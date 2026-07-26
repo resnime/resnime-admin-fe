@@ -19,7 +19,7 @@ test("preview only updates from the fixed update preview button", async () => {
   ]);
 
   assert.doesNotMatch(app, /onValuesChange/);
-  assert.match(app, /fixed-update-preview-button/);
+  assert.match(app, /fixed-form-actions/);
   assert.match(app, /setPreviewAnime\(animeForm\.getFieldsValue\(true\)\)/);
   assert.doesNotMatch(animeForm, /Update Preview/);
 });

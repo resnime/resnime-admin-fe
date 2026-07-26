@@ -5,15 +5,16 @@ import {
   Form,
   InputNumber,
   Layout,
+  Modal,
   Space,
   Typography,
   message,
 } from "antd";
-import { SearchOutlined } from "@ant-design/icons";
+import { DatabaseOutlined, SearchOutlined } from "@ant-design/icons";
 import React, { useState } from "react";
 import AnimeForm from "./components/AnimeForm.jsx";
 import AnimePreview from "./components/AnimePreview.jsx";
-import { scrapeAnime } from "./services/animeApi.js";
+import { scrapeAnime, submitAnimeToTurso } from "./services/animeApi.js";
 
 const { Content } = Layout;
 const { Paragraph, Title } = Typography;
@@ -41,6 +42,7 @@ export default function App() {
   const [scrapeForm] = Form.useForm();
   const [animeForm] = Form.useForm();
   const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [warnings, setWarnings] = useState([]);
   const [hasData, setHasData] = useState(false);
   const [previewAnime, setPreviewAnime] = useState(emptyAnime);
@@ -62,6 +64,55 @@ export default function App() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSubmitToTurso = async () => {
+    await animeForm.validateFields();
+    const values = animeForm.getFieldsValue(true);
+
+    Modal.confirm({
+      title: "Submit anime to Turso?",
+      content:
+        "Submitting the same MyAnimeList ID will update the anime and replace its episodes, embed links, characters, and voice actors with the current form data.",
+      okText: "Submit",
+      cancelText: "Cancel",
+      onOk: async () => {
+        setSubmitting(true);
+        try {
+          const result = await submitAnimeToTurso(values);
+          setPreviewAnime(values);
+          const operation = result.data.operation;
+          const counts = result.data.counts;
+          messageApi.success(
+            `Anime ${operation} successfully (${counts.episodes} episodes, ${counts.episode_links} links, ${counts.characters} characters, ${counts.voice_actors} voice actors)`,
+          );
+        } catch (error) {
+          showSubmitError(error);
+        } finally {
+          setSubmitting(false);
+        }
+      },
+    });
+  };
+
+  const showSubmitError = (error) => {
+    if (error.details?.length) {
+      Modal.error({
+        title: error.message,
+        content: (
+          <ul className="submit-error-list">
+            {error.details.map((detail) => (
+              <li key={`${detail.field}-${detail.message}`}>
+                <strong>{detail.field}</strong>: {detail.message}
+              </li>
+            ))}
+          </ul>
+        ),
+      });
+      return;
+    }
+
+    messageApi.error(error.message);
   };
 
   return (
@@ -132,14 +183,21 @@ export default function App() {
           {hasData ? <AnimeForm form={animeForm} /> : null}
         </Form>
         {hasData ? (
-          <Button
-            type="primary"
-            size="large"
-            className="fixed-update-preview-button"
-            onClick={updatePreview}
-          >
-            Update Preview
-          </Button>
+          <Space className="fixed-form-actions">
+            <Button size="large" onClick={updatePreview}>
+              Update Preview
+            </Button>
+            <Button
+              type="primary"
+              size="large"
+              icon={<DatabaseOutlined />}
+              loading={submitting}
+              disabled={submitting}
+              onClick={handleSubmitToTurso}
+            >
+              Submit to Turso
+            </Button>
+          </Space>
         ) : null}
       </Content>
     </Layout>

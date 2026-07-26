@@ -73,9 +73,31 @@ export default function EpisodeEditor({ form }) {
           </Col>
         </Row>
 
-        <Form.List name="episodes">
-          {(fields, { add, remove }) => (
+        <Form.List
+          name="episodes"
+          rules={[
+            {
+              validator: async (_, value = []) => {
+                const numbers = new Set();
+                for (const episode of value) {
+                  const number = Number(episode?.episode_number);
+                  if (!Number.isInteger(number) || number <= 0) {
+                    throw new Error(
+                      "Episode number must be a positive integer.",
+                    );
+                  }
+                  if (numbers.has(number)) {
+                    throw new Error("Episode numbers must be unique.");
+                  }
+                  numbers.add(number);
+                }
+              },
+            },
+          ]}
+        >
+          {(fields, { add, remove }, { errors }) => (
             <Space direction="vertical" size="middle" className="full-width">
+              <Form.ErrorList errors={errors} />
               <Button
                 icon={<PlusOutlined />}
                 onClick={() =>
@@ -111,6 +133,18 @@ export default function EpisodeEditor({ form }) {
                             <Form.Item
                               label="Episode Number"
                               name={[field.name, "episode_number"]}
+                              rules={[
+                                {
+                                  required: true,
+                                  message: "Episode number is required.",
+                                },
+                                {
+                                  type: "number",
+                                  min: 1,
+                                  message:
+                                    "Episode number must be a positive integer.",
+                                },
+                              ]}
                             >
                               <InputNumber
                                 min={1}
@@ -140,6 +174,13 @@ export default function EpisodeEditor({ form }) {
                                   <Form.Item
                                     name={[linkField.name, "embed_url"]}
                                     className="compact-form-item"
+                                    rules={[
+                                      {
+                                        required: true,
+                                        whitespace: true,
+                                        message: "Embed URL is required.",
+                                      },
+                                    ]}
                                   >
                                     <Input placeholder="https://example.com/embed/..." />
                                   </Form.Item>

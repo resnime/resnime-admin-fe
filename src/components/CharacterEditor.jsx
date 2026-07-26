@@ -53,12 +53,32 @@ export default function CharacterEditor() {
                     <>
                       <Row gutter={[12, 0]}>
                         <Col xs={24} md={10}>
-                          <Form.Item label="Name" name={[field.name, "name"]}>
+                          <Form.Item
+                            label="Name"
+                            name={[field.name, "name"]}
+                            rules={[
+                              {
+                                required: true,
+                                whitespace: true,
+                                message: "Character name is required.",
+                              },
+                            ]}
+                          >
                             <Input />
                           </Form.Item>
                         </Col>
                         <Col xs={24} md={8}>
-                          <Form.Item label="Role" name={[field.name, "role"]}>
+                          <Form.Item
+                            label="Role"
+                            name={[field.name, "role"]}
+                            rules={[
+                              {
+                                required: true,
+                                whitespace: true,
+                                message: "Character role is required.",
+                              },
+                            ]}
+                          >
                             <Input placeholder="Main or Supporting" />
                           </Form.Item>
                         </Col>
@@ -96,6 +116,14 @@ export default function CharacterEditor() {
                                     <Form.Item
                                       label="Name"
                                       name={[voiceField.name, "name"]}
+                                      rules={[
+                                        {
+                                          required: true,
+                                          whitespace: true,
+                                          message:
+                                            "Voice actor name is required.",
+                                        },
+                                      ]}
                                     >
                                       <Input />
                                     </Form.Item>

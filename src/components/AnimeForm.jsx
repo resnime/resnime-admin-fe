@@ -23,7 +23,17 @@ export default function AnimeForm({ form }) {
         <Card title="Metadata">
           <Row gutter={[16, 0]}>
             <Col xs={24} md={8}>
-              <Form.Item label="MAL ID" name="id">
+              <Form.Item
+                label="MAL ID"
+                name="id"
+                rules={[
+                  { required: true, message: "MAL ID is required." },
+                  {
+                    pattern: /^[1-9]\d*$/,
+                    message: "MAL ID must be a positive digit string.",
+                  },
+                ]}
+              >
                 <Input />
               </Form.Item>
             </Col>
@@ -38,7 +48,18 @@ export default function AnimeForm({ form }) {
               </Form.Item>
             </Col>
             <Col xs={24} md={8}>
-              <Form.Item label="Rating" name="rating">
+              <Form.Item
+                label="Rating"
+                name="rating"
+                rules={[
+                  { required: true, message: "Rating is required." },
+                  {
+                    type: "number",
+                    min: 0,
+                    message: "Rating must be a non-negative number.",
+                  },
+                ]}
+              >
                 <InputNumber
                   min={0}
                   max={10}
@@ -48,7 +69,17 @@ export default function AnimeForm({ form }) {
               </Form.Item>
             </Col>
             <Col xs={24} md={8}>
-              <Form.Item label="Status" name="status">
+              <Form.Item
+                label="Status"
+                name="status"
+                rules={[
+                  { required: true, message: "Status is required." },
+                  {
+                    enum: ["Ongoing", "Finished"],
+                    message: "Status must be Ongoing or Finished.",
+                  },
+                ]}
+              >
                 <Select
                   allowClear
                   options={[{ value: "Ongoing" }, { value: "Finished" }]}
