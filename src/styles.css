@@ -32,6 +32,10 @@ body {
   margin-bottom: 20px;
 }
 
+.mode-switch {
+  margin-bottom: 20px;
+}
+
 .scrape-form {
   gap: 12px;
 }
@@ -120,6 +124,28 @@ body {
 .submit-error-list {
   margin: 0;
   padding-left: 18px;
+}
+
+.bulk-toolbar,
+.bulk-review-actions {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.bulk-summary {
+  margin: 0;
+}
+
+.table-poster {
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.table-poster-placeholder {
+  width: 48px;
+  height: 64px;
+  border-radius: 6px;
+  background: #eef1f6;
 }
 
 @media (max-width: 720px) {

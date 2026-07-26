@@ -1,5 +1,6 @@
 import {
   Card,
+  Checkbox,
   Col,
   Divider,
   Form,
@@ -15,13 +16,20 @@ import CharacterEditor from "./CharacterEditor.jsx";
 
 const { TextArea } = Input;
 
-export default function AnimeForm({ form }) {
+export default function AnimeForm({ form, mode = "manual" }) {
   return (
     <section className="section">
       <Divider orientation="left">Editable Anime Form</Divider>
       <Space direction="vertical" size="large" className="full-width">
         <Card title="Metadata">
           <Row gutter={[16, 0]}>
+            {mode === "bulk" ? (
+              <Col xs={24}>
+                <Form.Item name="is_reviewed" valuePropName="checked">
+                  <Checkbox>Mark this anime as reviewed</Checkbox>
+                </Form.Item>
+              </Col>
+            ) : null}
             <Col xs={24} md={8}>
               <Form.Item
                 label="MAL ID"

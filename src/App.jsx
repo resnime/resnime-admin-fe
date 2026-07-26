@@ -6,6 +6,7 @@ import {
   InputNumber,
   Layout,
   Modal,
+  Segmented,
   Space,
   Typography,
   message,
@@ -14,6 +15,7 @@ import { DatabaseOutlined, SearchOutlined } from "@ant-design/icons";
 import React, { useState } from "react";
 import AnimeForm from "./components/AnimeForm.jsx";
 import AnimePreview from "./components/AnimePreview.jsx";
+import BulkImport from "./components/BulkImport.jsx";
 import { scrapeAnime, submitAnimeToTurso } from "./services/animeApi.js";
 
 const { Content } = Layout;
@@ -46,6 +48,7 @@ export default function App() {
   const [warnings, setWarnings] = useState([]);
   const [hasData, setHasData] = useState(false);
   const [previewAnime, setPreviewAnime] = useState(emptyAnime);
+  const [mode, setMode] = useState("manual");
   const [messageApi, contextHolder] = message.useMessage();
   const updatePreview = () => setPreviewAnime(animeForm.getFieldsValue(true));
 
@@ -127,78 +130,94 @@ export default function App() {
           </Paragraph>
         </header>
 
-        <Card className="scrape-card">
-          <Form
-            form={scrapeForm}
-            layout="inline"
-            onFinish={handleScrape}
-            className="scrape-form"
-          >
-            <Form.Item
-              label="MyAnimeList ID"
-              name="malId"
-              rules={[
-                { required: true, message: "Masukkan MyAnimeList ID." },
-                {
-                  validator: (_, value) => {
-                    if (value === undefined || value === null || value === "")
-                      return Promise.resolve();
-                    return Number.isInteger(Number(value)) && Number(value) > 0
-                      ? Promise.resolve()
-                      : Promise.reject(new Error("ID harus angka positif."));
-                  },
-                },
-              ]}
-            >
-              <InputNumber
-                min={1}
-                precision={0}
-                controls={false}
-                className="mal-input"
-              />
-            </Form.Item>
-            <Form.Item>
-              <Button
-                type="primary"
-                htmlType="submit"
-                loading={loading}
-                icon={<SearchOutlined />}
+        <Segmented
+          className="mode-switch"
+          options={[
+            { label: "Manual Input", value: "manual" },
+            { label: "Bulk Insert", value: "bulk" },
+          ]}
+          value={mode}
+          onChange={setMode}
+        />
+
+        {mode === "manual" ? (
+          <>
+            <Card className="scrape-card">
+              <Form
+                form={scrapeForm}
+                layout="inline"
+                onFinish={handleScrape}
+                className="scrape-form"
               >
-                Scrape Anime
-              </Button>
-            </Form.Item>
-          </Form>
-        </Card>
+                <Form.Item
+                  label="MyAnimeList ID"
+                  name="malId"
+                  rules={[
+                    { required: true, message: "Masukkan MyAnimeList ID." },
+                    {
+                      validator: (_, value) => {
+                        if (value === undefined || value === null || value === "")
+                          return Promise.resolve();
+                        return Number.isInteger(Number(value)) && Number(value) > 0
+                          ? Promise.resolve()
+                          : Promise.reject(new Error("ID harus angka positif."));
+                      },
+                    },
+                  ]}
+                >
+                  <InputNumber
+                    min={1}
+                    precision={0}
+                    controls={false}
+                    className="mal-input"
+                  />
+                </Form.Item>
+                <Form.Item>
+                  <Button
+                    type="primary"
+                    htmlType="submit"
+                    loading={loading}
+                    icon={<SearchOutlined />}
+                  >
+                    Scrape Anime
+                  </Button>
+                </Form.Item>
+              </Form>
+            </Card>
 
-        {warnings.length ? (
-          <Space direction="vertical" className="full-width warning-list">
-            {warnings.map((warning) => (
-              <Alert key={warning} type="warning" showIcon message={warning} />
-            ))}
-          </Space>
-        ) : null}
+            {warnings.length ? (
+              <Space direction="vertical" className="full-width warning-list">
+                {warnings.map((warning) => (
+                  <Alert key={warning} type="warning" showIcon message={warning} />
+                ))}
+              </Space>
+            ) : null}
 
-        <Form form={animeForm} layout="vertical" initialValues={emptyAnime}>
-          <AnimePreview anime={previewAnime} />
-          {hasData ? <AnimeForm form={animeForm} /> : null}
-        </Form>
-        {hasData ? (
-          <Space className="fixed-form-actions">
-            <Button size="large" onClick={updatePreview}>
-              Update Preview
-            </Button>
-            <Button
-              type="primary"
-              size="large"
-              icon={<DatabaseOutlined />}
-              loading={submitting}
-              disabled={submitting}
-              onClick={handleSubmitToTurso}
-            >
-              Submit to Turso
-            </Button>
-          </Space>
-        ) : null}
+            <Form form={animeForm} layout="vertical" initialValues={emptyAnime}>
+              <AnimePreview anime={previewAnime} />
+              {hasData ? <AnimeForm form={animeForm} /> : null}
+            </Form>
+            {hasData ? (
+              <Space className="fixed-form-actions">
+                <Button size="large" onClick={updatePreview}>
+                  Update Preview
+                </Button>
+                <Button
+                  type="primary"
+                  size="large"
+                  icon={<DatabaseOutlined />}
+                  loading={submitting}
+                  disabled={submitting}
+                  onClick={handleSubmitToTurso}
+                >
+                  Submit to Turso
+                </Button>
+              </Space>
+            ) : null}
+          </>
+        ) : (
+          <BulkImport messageApi={messageApi} />
+        )}
       </Content>
     </Layout>
   );
