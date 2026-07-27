@@ -6,6 +6,7 @@ import {
   Form,
   Image,
   Modal,
+  Radio,
   Space,
   Table,
   Tag,
@@ -20,11 +21,12 @@ import {
   EditOutlined,
   InboxOutlined,
   RollbackOutlined,
+  SyncOutlined,
 } from "@ant-design/icons";
 import React, { useState } from "react";
 import AnimeForm from "./AnimeForm.jsx";
 import AnimePreview from "./AnimePreview.jsx";
-import { bulkUpsertAnime, submitAnimeToTurso } from "../services/animeApi.js";
+import { bulkUpsertAnime, scrapeAnime, submitAnimeToTurso } from "../services/animeApi.js";
 import {
   BULK_STORAGE_KEY,
   emptyBulkAnime,
@@ -33,6 +35,11 @@ import {
   parseStoredBulkItems,
   stripBulkMetadata,
 } from "../utils/bulkImport.js";
+import {
+  SCRAPE_MERGE_STRATEGY,
+  mergeScrapedAnimeData,
+  willReplaceRemoveEpisodes,
+} from "../utils/mergeScrapedAnimeData.js";
 
 const { Dragger } = Upload;
 const { Paragraph, Text } = Typography;
@@ -52,6 +59,11 @@ export default function BulkImport({ messageApi }) {
   const [rowLoadingId, setRowLoadingId] = useState(null);
   const [bulkSubmitting, setBulkSubmitting] = useState(false);
   const [reviewDirty, setReviewDirty] = useState(false);
+  const [scrapeModalOpen, setScrapeModalOpen] = useState(false);
+  const [scrapeStrategy, setScrapeStrategy] = useState(
+    SCRAPE_MERGE_STRATEGY.FILL_MISSING,
+  );
+  const [rescraping, setRescraping] = useState(false);
 
   const activeItem = items.find((item) => item.id === activeId);
 
@@ -108,6 +120,58 @@ export default function BulkImport({ messageApi }) {
     setReviewDirty(false);
     setActiveId(null);
     messageApi.success("Bulk data updated.");
+  };
+
+  const openScrapeModal = () => {
+    setScrapeStrategy(SCRAPE_MERGE_STRATEGY.FILL_MISSING);
+    setScrapeModalOpen(true);
+  };
+
+  const applyMergedAnime = (mergedAnime) => {
+    bulkForm.setFieldsValue(mergedAnime);
+    setReviewDirty(true);
+    messageApi.success("Scraped data has been applied to the review form.");
+  };
+
+  const handleScrapeAgain = async () => {
+    if (!activeItem || rescraping) return;
+
+    setRescraping(true);
+    try {
+      const result = await scrapeAnime(activeItem.id);
+      const currentData = bulkForm.getFieldsValue(true);
+      const applyScrapedData = () => {
+        const mergedAnime = mergeScrapedAnimeData({
+          currentData,
+          scrapedData: result.data,
+          strategy: scrapeStrategy,
+        });
+        applyMergedAnime(mergedAnime);
+      };
+
+      setScrapeModalOpen(false);
+      if (
+        scrapeStrategy === SCRAPE_MERGE_STRATEGY.REPLACE_SCRAPED &&
+        willReplaceRemoveEpisodes(currentData, result.data)
+      ) {
+        Modal.confirm({
+          title: "Scraped episode total is lower",
+          content:
+            "The scraped episode total is lower than the current data. Episodes outside the new range will be removed from the review form.",
+          okText: "Apply Anyway",
+          cancelText: "Cancel",
+          onOk: applyScrapedData,
+        });
+      } else {
+        applyScrapedData();
+      }
+    } catch {
+      messageApi.error(
+        "Failed to scrape anime data. Your current form data was not changed.",
+      );
+    } finally {
+      setRescraping(false);
+    }
   };
 
   const handleUpload = async (file) => {
@@ -324,8 +388,65 @@ export default function BulkImport({ messageApi }) {
   ];
 
   if (activeItem) {
+    const scrapeAgainButton = (
+      <Button
+        icon={<SyncOutlined />}
+        loading={rescraping}
+        disabled={rescraping}
+        onClick={openScrapeModal}
+      >
+        {rescraping ? "Scraping..." : "Scrape Again"}
+      </Button>
+    );
+
     return (
       <section className="section">
+        <Modal
+          title="Scrape Anime Again"
+          open={scrapeModalOpen}
+          okText="Scrape & Apply"
+          cancelText="Cancel"
+          confirmLoading={rescraping}
+          okButtonProps={{ disabled: rescraping }}
+          onOk={handleScrapeAgain}
+          onCancel={() => {
+            if (!rescraping) setScrapeModalOpen(false);
+          }}
+        >
+          <Space direction="vertical" size="middle" className="full-width">
+            <Text>
+              Scrape the latest available anime data using MAL ID {activeItem.id} and
+              apply it to the current review form.
+            </Text>
+            <Radio.Group
+              className="full-width"
+              value={scrapeStrategy}
+              onChange={(event) => setScrapeStrategy(event.target.value)}
+              disabled={rescraping}
+            >
+              <Space direction="vertical" className="full-width">
+                <Radio value={SCRAPE_MERGE_STRATEGY.FILL_MISSING}>
+                  <Space direction="vertical" size={0}>
+                    <Text strong>Fill Missing Fields</Text>
+                    <Text type="secondary">
+                      Only fill fields that are currently empty. Existing reviewed data
+                      will be preserved.
+                    </Text>
+                  </Space>
+                </Radio>
+                <Radio value={SCRAPE_MERGE_STRATEGY.REPLACE_SCRAPED}>
+                  <Space direction="vertical" size={0}>
+                    <Text strong>Replace with Scraped Data</Text>
+                    <Text type="secondary">
+                      Replace available fields with the latest scraped values while
+                      preserving manually added episode links.
+                    </Text>
+                  </Space>
+                </Radio>
+              </Space>
+            </Radio.Group>
+          </Space>
+        </Modal>
         <Space className="bulk-review-actions" wrap>
           <Button icon={<RollbackOutlined />} onClick={backToList}>
             Back to Bulk List
@@ -347,7 +468,7 @@ export default function BulkImport({ messageApi }) {
           onValuesChange={() => setReviewDirty(true)}
         >
           <AnimePreview anime={previewAnime} />
-          <AnimeForm form={bulkForm} mode="bulk" />
+          <AnimeForm form={bulkForm} mode="bulk" metadataExtra={scrapeAgainButton} />
         </Form>
       </section>
     );

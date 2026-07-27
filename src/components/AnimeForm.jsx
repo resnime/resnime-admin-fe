@@ -16,12 +16,12 @@ import CharacterEditor from "./CharacterEditor.jsx";
 
 const { TextArea } = Input;
 
-export default function AnimeForm({ form, mode = "manual" }) {
+export default function AnimeForm({ form, mode = "manual", metadataExtra = null }) {
   return (
     <section className="section">
       <Divider orientation="left">Editable Anime Form</Divider>
       <Space direction="vertical" size="large" className="full-width">
-        <Card title="Metadata">
+        <Card title="Metadata" extra={metadataExtra}>
           <Row gutter={[16, 0]}>
             {mode === "bulk" ? (
               <Col xs={24}>
