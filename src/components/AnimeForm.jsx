@@ -51,6 +51,11 @@ export default function AnimeForm({ form, mode = "manual", metadataExtra = null 
               </Form.Item>
             </Col>
             <Col xs={24} md={8}>
+              <Form.Item label="Native Title" name="title_native">
+                <Input />
+              </Form.Item>
+            </Col>
+            <Col xs={24} md={8}>
               <Form.Item label="Romaji Title" name="title_romaji">
                 <Input />
               </Form.Item>

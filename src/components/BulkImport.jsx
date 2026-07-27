@@ -597,7 +597,7 @@ function Summary({ items }) {
 }
 
 function displayTitle(item) {
-  return item.title_romaji || item.title_en || "Untitled";
+  return item.title_en || item.title_romaji || item.title_native || `MAL ID ${item.id}`;
 }
 
 function buttonLabel(item) {

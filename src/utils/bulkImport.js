@@ -3,6 +3,7 @@ export const BULK_STORAGE_KEY = "resnime_admin_bulk_items_v1";
 export const emptyBulkAnime = {
   id: "",
   title_en: "",
+  title_native: "",
   title_romaji: "",
   photo: "",
   rating: 0,
@@ -103,6 +104,7 @@ function normalizeAnime(item) {
     ...emptyBulkAnime,
     id: normalizeMalId(source.id),
     title_en: normalizeString(source.title_en),
+    title_native: normalizeString(source.title_native),
     title_romaji: normalizeString(source.title_romaji),
     photo: normalizeString(source.photo),
     rating: typeof source.rating === "number" && Number.isFinite(source.rating) ? source.rating : 0,

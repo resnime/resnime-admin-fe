@@ -41,7 +41,7 @@ export default function AnimePreview({ anime }) {
               <Image
                 className="poster"
                 src={anime.photo}
-                alt={anime.title_romaji || anime.title_en}
+                alt={anime.title_en || anime.title_native || anime.title_romaji}
                 referrerPolicy="no-referrer"
               />
             ) : (
@@ -52,7 +52,10 @@ export default function AnimePreview({ anime }) {
             <Title level={4}>
               {anime.title_en || "Untitled English title"}
             </Title>
-            <Text type="secondary">{anime.title_romaji}</Text>
+            <Space orientation="vertical" size={0}>
+              <Text type="secondary">Native Title: {anime.title_native || "-"}</Text>
+              <Text type="secondary">Romaji Title: {anime.title_romaji || "-"}</Text>
+            </Space>
             <Descriptions
               className="meta"
               size="small"

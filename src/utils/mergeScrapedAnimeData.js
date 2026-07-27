@@ -7,6 +7,7 @@ export const SCRAPE_MERGE_STRATEGY = {
 
 const MERGE_FIELDS = [
   "title_en",
+  "title_native",
   "title_romaji",
   "photo",
   "rating",

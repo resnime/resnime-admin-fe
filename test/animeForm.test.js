@@ -21,5 +21,7 @@ test("preview only updates from the fixed update preview button", async () => {
   assert.doesNotMatch(app, /onValuesChange/);
   assert.match(app, /fixed-form-actions/);
   assert.match(app, /setPreviewAnime\(animeForm\.getFieldsValue\(true\)\)/);
+  assert.match(animeForm, /label="Native Title" name="title_native"/);
+  assert.match(animeForm, /English Title[\s\S]*Native Title[\s\S]*Romaji Title/);
   assert.doesNotMatch(animeForm, /Update Preview/);
 });

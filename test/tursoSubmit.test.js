@@ -14,6 +14,7 @@ test("frontend submits anime through backend API without Turso credentials", asy
   assert.match(app, /validateFields\(\)/);
   assert.match(app, /const values = animeForm\.getFieldsValue\(true\)/);
   assert.match(app, /submitAnimeToTurso\(values\)/);
+  assert.match(app, /title_en: ""[\s\S]*title_native: ""[\s\S]*title_romaji: ""/);
   assert.match(app, /Modal\.confirm/);
   assert.doesNotMatch(api, /TURSO_/);
   assert.doesNotMatch(packageJson, /@libsql\/client/);

@@ -11,6 +11,7 @@ test("fill missing fields only fills empty values and keeps reviewed data", () =
     currentData: {
       id: "52991",
       title_en: "Custom English Title",
+      title_native: "",
       title_romaji: "",
       photo: "",
       rating: 0,
@@ -28,6 +29,7 @@ test("fill missing fields only fills empty values and keeps reviewed data", () =
     scrapedData: {
       id: "999",
       title_en: "Scraped English Title",
+      title_native: "葬送のフリーレン",
       title_romaji: "Sousou no Frieren",
       photo: "https://poster.example/frieren.jpg",
       rating: 9.3,
@@ -40,6 +42,7 @@ test("fill missing fields only fills empty values and keeps reviewed data", () =
 
   assert.equal(result.id, "52991");
   assert.equal(result.title_en, "Custom English Title");
+  assert.equal(result.title_native, "葬送のフリーレン");
   assert.equal(result.title_romaji, "Sousou no Frieren");
   assert.equal(result.photo, "https://poster.example/frieren.jpg");
   assert.equal(result.rating, 9.3);
@@ -83,6 +86,7 @@ test("replace scraped data keeps current values when scraped values are empty", 
     currentData: {
       id: "11061",
       title_en: "Hunter x Hunter",
+      title_native: "ハンター×ハンター",
       photo: "https://poster.example/hxh.jpg",
       genres: ["Adventure"],
       characters: [{ name: "Gon", voice_actors: [] }],
@@ -92,6 +96,7 @@ test("replace scraped data keeps current values when scraped values are empty", 
     scrapedData: {
       id: "999",
       title_en: "",
+      title_native: "",
       photo: null,
       genres: [],
       characters: [],
@@ -102,6 +107,7 @@ test("replace scraped data keeps current values when scraped values are empty", 
 
   assert.equal(result.id, "11061");
   assert.equal(result.title_en, "Hunter x Hunter");
+  assert.equal(result.title_native, "ハンター×ハンター");
   assert.equal(result.photo, "https://poster.example/hxh.jpg");
   assert.deepEqual(result.genres, ["Adventure"]);
   assert.deepEqual(result.characters, [

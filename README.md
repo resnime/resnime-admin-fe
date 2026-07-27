@@ -48,6 +48,7 @@ Root file JSON harus array. Contoh minimal:
   {
     "id": "52991",
     "title_en": "Frieren: Beyond Journey's End",
+    "title_native": "葬送のフリーレン",
     "title_romaji": "Sousou no Frieren",
     "photo": "https://example.com/poster.jpg",
     "rating": 9.1,

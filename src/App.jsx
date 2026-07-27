@@ -24,6 +24,7 @@ const { Paragraph, Title } = Typography;
 const emptyAnime = {
   id: "",
   title_en: "",
+  title_native: "",
   title_romaji: "",
   photo: "",
   rating: 0,

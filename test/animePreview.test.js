@@ -18,6 +18,7 @@ test("AnimePreview renders voice actor images inside a scrollable character list
         anime: {
           id: "52991",
           title_en: "Frieren",
+          title_native: "葬送のフリーレン",
           title_romaji: "Sousou no Frieren",
           characters: [
             {
@@ -38,6 +39,8 @@ test("AnimePreview renders voice actor images inside a scrollable character list
     );
 
     assert.match(html, /character-preview-scroll/);
+    assert.match(html, /Native Title/);
+    assert.match(html, /葬送のフリーレン/);
     assert.match(html, /voice-actor-img/);
     assert.match(html, /https:\/\/example\.test\/voice-actor\.jpg/);
   } finally {
