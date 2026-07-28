@@ -122,6 +122,17 @@ body {
   margin-bottom: 0;
 }
 
+.json-example {
+  max-height: 220px;
+  margin: 0;
+  padding: 12px;
+  overflow: auto;
+  border: 1px solid #d9d9d9;
+  border-radius: 6px;
+  background: #f8fafc;
+  font-size: 12px;
+}
+
 .submit-error-list {
   margin: 0;
   padding-left: 18px;

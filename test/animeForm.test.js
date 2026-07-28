@@ -12,6 +12,19 @@ test("Anime form editors expose scroll wrappers", async () => {
   assert.match(characterEditor, /character-editor-scroll/);
 });
 
+test("Episode editor exposes local episode link JSON import", async () => {
+  const episodeEditor = await readFile(
+    new URL("../src/components/EpisodeEditor.jsx", import.meta.url),
+    "utf8",
+  );
+
+  assert.match(episodeEditor, /Import Episode Links JSON/);
+  assert.match(episodeEditor, /Upload\.Dragger/);
+  assert.match(episodeEditor, /beforeUpload/);
+  assert.match(episodeEditor, /form\.setFieldsValue\(\{\s*episodes: merged\.episodes,\s*episode_total: merged\.episode_total,/);
+  assert.doesNotMatch(episodeEditor, /submitAnimeToTurso|bulkUpsertAnime|localStorage/);
+});
+
 test("preview only updates from the fixed update preview button", async () => {
   const [app, animeForm] = await Promise.all([
     readFile(new URL("../src/App.jsx", import.meta.url), "utf8"),

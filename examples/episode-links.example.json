@@ -1,0 +1,23 @@
+[
+  {
+    "episode_number": 1,
+    "thumbnail_url": null,
+    "links": [
+      {
+        "embed_url": "https://example.com/embed/episode-1"
+      }
+    ]
+  },
+  {
+    "episode_number": 2,
+    "thumbnail_url": null,
+    "links": [
+      {
+        "embed_url": "https://example.com/embed/episode-2"
+      },
+      {
+        "embed_url": "https://backup.example.com/embed/episode-2"
+      }
+    ]
+  }
+]
