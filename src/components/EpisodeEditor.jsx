@@ -25,13 +25,15 @@ import {
   mergeEpisodeLinks,
   parseEpisodeLinksJson,
 } from "../utils/episodeLinksJson.js";
-import { mergeEpisodeRange } from "../utils/episodes.js";
+import { isValidEpisodeAiredAt } from "../utils/episodeDate.js";
+import { createEmptyEpisode, mergeEpisodeRange } from "../utils/episodes.js";
 
 const { Text } = Typography;
 
 const formatExample = `[
   {
     "episode_number": 1,
+    "aired_at": "1999-10-20T00:00:00+00:00",
     "thumbnail_url": null,
     "links": [
       {
@@ -218,9 +220,7 @@ export default function EpisodeEditor({ form }) {
                   icon={<PlusOutlined />}
                   onClick={() =>
                     add({
-                      episode_number: nextEpisodeNumber(episodes),
-                      thumbnail_url: null,
-                      links: [],
+                      ...createEmptyEpisode(nextEpisodeNumber(episodes)),
                     })
                   }
                 >
@@ -270,7 +270,30 @@ export default function EpisodeEditor({ form }) {
                               />
                             </Form.Item>
                           </Col>
-                          <Col xs={24} md={16}>
+                          <Col xs={24} md={8}>
+                            <Form.Item
+                              label="Aired At"
+                              name={[field.name, "aired_at"]}
+                              rules={[
+                                {
+                                  validator: (_, value) =>
+                                    isValidEpisodeAiredAt(value)
+                                      ? Promise.resolve()
+                                      : Promise.reject(
+                                          new Error(
+                                            "Use an ISO 8601 date with timezone, or leave it empty.",
+                                          ),
+                                        ),
+                                },
+                              ]}
+                            >
+                              <Input
+                                allowClear
+                                placeholder="2026-07-26T00:00:00Z"
+                              />
+                            </Form.Item>
+                          </Col>
+                          <Col xs={24} md={8}>
                             <Form.Item
                               label="Thumbnail URL"
                               name={[field.name, "thumbnail_url"]}

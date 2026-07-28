@@ -1,3 +1,8 @@
+import {
+  isValidEpisodeAiredAt,
+  normalizeEpisodeAiredAt,
+} from "./episodeDate.js";
+
 export const BULK_STORAGE_KEY = "resnime_admin_bulk_items_v1";
 
 export const emptyBulkAnime = {
@@ -52,6 +57,13 @@ export function normalizeBulkUploadItems(uploadedItems, existingItems = []) {
     if (existing?.is_reviewed === true) {
       summary.reviewedSkipped += 1;
       skipped.push({ index, anime_id: id, reason: "Reviewed item was kept" });
+      return;
+    }
+
+    const airedAtError = findEpisodeAiredAtError(rawItem);
+    if (airedAtError) {
+      summary.invalidSkipped += 1;
+      skipped.push({ index, anime_id: id, reason: airedAtError });
       return;
     }
 
@@ -130,11 +142,24 @@ function normalizeEpisode(episode) {
     episode_number: Number.isInteger(Number(episode?.episode_number))
       ? Number(episode.episode_number)
       : null,
+    aired_at: normalizeEpisodeAiredAt(episode?.aired_at),
     thumbnail_url: normalizeNullableString(episode?.thumbnail_url),
     links: Array.isArray(episode?.links)
       ? episode.links.map(normalizeEpisodeLink).filter((link) => link.embed_url)
       : [],
   };
+}
+
+function findEpisodeAiredAtError(item) {
+  if (!Array.isArray(item?.episodes)) return null;
+
+  for (const [index, episode] of item.episodes.entries()) {
+    if (!isValidEpisodeAiredAt(episode?.aired_at)) {
+      return `Episode ${index + 1}: aired_at must be a valid ISO 8601 date string or null`;
+    }
+  }
+
+  return null;
 }
 
 function normalizeEpisodeLink(link) {

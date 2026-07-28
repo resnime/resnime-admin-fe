@@ -1,4 +1,5 @@
 import { normalizeBulkItem } from "./bulkImport.js";
+import { createEmptyEpisode } from "./episodes.js";
 
 export const SCRAPE_MERGE_STRATEGY = {
   FILL_MISSING: "fill_missing",
@@ -85,15 +86,12 @@ function mergeEpisodesForReplace(current, scraped) {
     const currentEpisode = currentByNumber.get(episodeNumber);
     const scrapedEpisode = scrapedByNumber.get(episodeNumber);
     if (!currentEpisode) {
-      return scrapedEpisode || {
-        episode_number: episodeNumber,
-        thumbnail_url: null,
-        links: [],
-      };
+      return scrapedEpisode || createEmptyEpisode(episodeNumber);
     }
 
     return {
       episode_number: episodeNumber,
+      aired_at: currentEpisode.aired_at || scrapedEpisode?.aired_at || null,
       thumbnail_url: currentEpisode.thumbnail_url || scrapedEpisode?.thumbnail_url || null,
       links: currentEpisode.links.length ? currentEpisode.links : scrapedEpisode?.links || [],
     };

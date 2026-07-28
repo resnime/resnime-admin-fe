@@ -25,6 +25,7 @@ import AnimeForm from "./components/AnimeForm.jsx";
 import AnimePreview from "./components/AnimePreview.jsx";
 
 import { scrapeAnime, submitAnimeToTurso } from "./services/animeApi.js";
+import { normalizeAnimeEpisodeDates } from "./utils/episodeDate.js";
 import { getActiveMode } from "./utils/routes.js";
 
 const { Content } = Layout;
@@ -64,14 +65,15 @@ export default function App() {
   const location = useLocation();
   const navigate = useNavigate();
   const activeMode = getActiveMode(location.pathname);
-  const updatePreview = () => setPreviewAnime(animeForm.getFieldsValue(true));
+  const updatePreview = () =>
+    setPreviewAnime(normalizeAnimeEpisodeDates(animeForm.getFieldsValue(true)));
 
   const handleScrape = async ({ malId }) => {
     setLoading(true);
     setWarnings([]);
     try {
       const result = await scrapeAnime(String(malId));
-      const scrapedAnime = { ...emptyAnime, ...result.data };
+      const scrapedAnime = normalizeAnimeEpisodeDates({ ...emptyAnime, ...result.data });
       animeForm.setFieldsValue(scrapedAnime);
       setPreviewAnime(scrapedAnime);
       setHasData(true);
@@ -85,7 +87,7 @@ export default function App() {
 
   const handleSubmitToTurso = async () => {
     await animeForm.validateFields();
-    const values = animeForm.getFieldsValue(true);
+    const values = normalizeAnimeEpisodeDates(animeForm.getFieldsValue(true));
 
     Modal.confirm({
       title: "Submit anime to Turso?",

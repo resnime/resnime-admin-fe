@@ -31,7 +31,13 @@ test("normalizeBulkUploadItems skips invalid and duplicate MAL IDs without overw
   const result = normalizeBulkUploadItems(
     [
       { id: "52991", title_romaji: "Should not overwrite" },
-      { id: "21", title_native: "更新", title_romaji: "Updated title", is_reviewed: true },
+      {
+        id: "21",
+        title_native: "更新",
+        title_romaji: "Updated title",
+        is_reviewed: true,
+        episodes: [{ episode_number: 1, aired_at: "2026-07-26T00:00:00+00:00" }],
+      },
       { id: "11061", title_en: "Hunter x Hunter", title_native: " ハンター×ハンター ", genres: "bad" },
       { id: "11061", title_en: "Duplicate" },
       { id: "abc", title_en: "Invalid" },
@@ -42,6 +48,7 @@ test("normalizeBulkUploadItems skips invalid and duplicate MAL IDs without overw
   assert.equal(result.items.length, 3);
   assert.equal(result.items.find((item) => item.id === "52991").title_native, "Reviewed native");
   assert.equal(result.items.find((item) => item.id === "21").title_native, "更新");
+  assert.equal(result.items.find((item) => item.id === "21").episodes[0].aired_at, "2026-07-26T00:00:00Z");
   assert.equal(result.items.find((item) => item.id === "11061").title_native, "ハンター×ハンター");
   assert.equal(result.items.find((item) => item.id === "52991").title_romaji, "Reviewed title");
   assert.equal(result.items.find((item) => item.id === "21").title_romaji, "Updated title");
@@ -63,8 +70,29 @@ test("bulk normalizers keep older JSON and localStorage compatible with title_na
   const uploaded = normalizeBulkUploadItems([{ id: "1", title_en: "Old JSON" }]);
   assert.equal(uploaded.items[0].title_native, "");
 
-  const stored = parseStoredBulkItems(JSON.stringify([{ id: "2", title_romaji: "Stored" }]));
+  const stored = parseStoredBulkItems(JSON.stringify([
+    { id: "2", title_romaji: "Stored", episodes: [{ episode_number: 1, links: [] }] },
+  ]));
   assert.equal(stored[0].title_native, "");
+  assert.equal(stored[0].episodes[0].aired_at, null);
+});
+
+test("normalizeBulkUploadItems rejects invalid episode aired_at clearly", () => {
+  const result = normalizeBulkUploadItems([
+    {
+      id: "1",
+      episodes: [{ episode_number: 1, aired_at: "invalid date", links: [] }],
+    },
+  ]);
+
+  assert.deepEqual(result.summary, {
+    added: 0,
+    updated: 0,
+    reviewedSkipped: 0,
+    invalidSkipped: 1,
+    duplicateSkipped: 0,
+  });
+  assert.match(result.skipped[0].reason, /aired_at/);
 });
 
 test("stripBulkMetadata removes frontend-only import state recursively", () => {

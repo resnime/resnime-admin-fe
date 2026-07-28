@@ -1,3 +1,14 @@
+import { normalizeEpisodeAiredAt } from "./episodeDate.js";
+
+export function createEmptyEpisode(episodeNumber) {
+  return {
+    episode_number: episodeNumber,
+    aired_at: null,
+    thumbnail_url: null,
+    links: [],
+  };
+}
+
 export function mergeEpisodeRange(currentEpisodes = [], start, end) {
   const startEpisode = Number(start);
   const endEpisode = Number(end);
@@ -26,15 +37,21 @@ export function mergeEpisodeRange(currentEpisodes = [], start, end) {
     episodeNumber += 1
   ) {
     if (!byNumber.has(episodeNumber)) {
-      byNumber.set(episodeNumber, {
-        episode_number: episodeNumber,
-        thumbnail_url: null,
-        links: [],
-      });
+      byNumber.set(episodeNumber, createEmptyEpisode(episodeNumber));
     }
   }
 
-  return [...byNumber.values()].sort(
+  return [...byNumber.values()].map(normalizeEpisode).sort(
     (a, b) => Number(a.episode_number) - Number(b.episode_number),
   );
+}
+
+export function normalizeEpisode(episode) {
+  return {
+    ...episode,
+    episode_number: Number(episode.episode_number),
+    aired_at: normalizeEpisodeAiredAt(episode?.aired_at),
+    thumbnail_url: episode?.thumbnail_url || null,
+    links: Array.isArray(episode?.links) ? episode.links : [],
+  };
 }

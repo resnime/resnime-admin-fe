@@ -19,6 +19,7 @@ test("parseEpisodeLinksJson normalizes episode numbers, URLs, thumbnails, duplic
     JSON.stringify([
       {
         episode_number: "2",
+        aired_at: "2026-07-26T00:00:00+00:00",
         thumbnail_url: "",
         links: [
           { embed_url: " https://example.com/embed/episode-2?x=1 " },
@@ -27,6 +28,7 @@ test("parseEpisodeLinksJson normalizes episode numbers, URLs, thumbnails, duplic
       },
       {
         episode_number: 1,
+        aired_at: "",
         thumbnail_url: "https://example.com/thumb-1.jpg",
         links: [{ embed_url: "http://example.com/embed/episode-1" }],
       },
@@ -46,11 +48,13 @@ test("parseEpisodeLinksJson normalizes episode numbers, URLs, thumbnails, duplic
   assert.deepEqual(result.episodes, [
     {
       episode_number: 1,
+      aired_at: null,
       thumbnail_url: "https://example.com/thumb-1.jpg",
       links: [{ embed_url: "http://example.com/embed/episode-1" }],
     },
     {
       episode_number: 2,
+      aired_at: "2026-07-26T00:00:00Z",
       thumbnail_url: "https://example.com/thumb-2.jpg",
       links: [
         { embed_url: "https://example.com/embed/episode-2?x=1" },
@@ -70,11 +74,13 @@ test("parseEpisodeLinksJson rejects invalid episode numbers, link arrays, and UR
       { episode_number: 3, links: [] },
       { episode_number: 4, links: [{ embed_url: "javascript:alert(1)" }] },
       { episode_number: 5, links: [{ embed_url: "/relative" }] },
+      { episode_number: 6, aired_at: "yesterday", links: [{ embed_url: "https://example.com/6" }] },
     ]),
   );
 
   assert.equal(result.ok, false);
-  assert.equal(result.errors.length, 5);
+  assert.equal(result.errors.length, 6);
+  assert.match(result.errors.at(-1), /aired_at/);
 });
 
 test("parseEpisodeLinksJson keeps valid episodes when thumbnail warning falls back to null", () => {
@@ -97,6 +103,7 @@ test("mergeEpisodeLinks merges without mutating inputs and updates episode_total
   const currentEpisodes = [
     {
       episode_number: 2,
+      aired_at: "2026-07-25T00:00:00Z",
       thumbnail_url: "https://example.com/current-thumb.jpg",
       links: [{ embed_url: "https://existing.example/2" }],
     },
@@ -104,11 +111,13 @@ test("mergeEpisodeLinks merges without mutating inputs and updates episode_total
   const importedEpisodes = [
     {
       episode_number: 1,
+      aired_at: "2026-07-26T00:00:00Z",
       thumbnail_url: null,
       links: [{ embed_url: "https://new.example/1" }],
     },
     {
       episode_number: 2,
+      aired_at: "2026-07-26T00:00:00Z",
       thumbnail_url: "https://example.com/imported-thumb.jpg",
       links: [
         { embed_url: "https://existing.example/2" },
@@ -132,11 +141,13 @@ test("mergeEpisodeLinks merges without mutating inputs and updates episode_total
   assert.deepEqual(result.episodes, [
     {
       episode_number: 1,
+      aired_at: "2026-07-26T00:00:00Z",
       thumbnail_url: null,
       links: [{ embed_url: "https://new.example/1" }],
     },
     {
       episode_number: 2,
+      aired_at: "2026-07-25T00:00:00Z",
       thumbnail_url: "https://example.com/current-thumb.jpg",
       links: [
         { embed_url: "https://existing.example/2" },
@@ -160,6 +171,7 @@ test("mergeEpisodeLinks replaces only imported episode links and preserves unrel
     currentEpisodes: [
       {
         episode_number: 1,
+        aired_at: "1999-10-20T00:00:00Z",
         thumbnail_url: "https://example.com/keep-thumb.jpg",
         links: [{ embed_url: "https://old.example/1" }],
       },
@@ -172,6 +184,7 @@ test("mergeEpisodeLinks replaces only imported episode links and preserves unrel
     importedEpisodes: [
       {
         episode_number: 1,
+        aired_at: null,
         thumbnail_url: null,
         links: [{ embed_url: "https://new.example/1" }],
       },
@@ -183,15 +196,54 @@ test("mergeEpisodeLinks replaces only imported episode links and preserves unrel
   assert.deepEqual(result.episodes, [
     {
       episode_number: 1,
+      aired_at: "1999-10-20T00:00:00Z",
       thumbnail_url: "https://example.com/keep-thumb.jpg",
       links: [{ embed_url: "https://new.example/1" }],
     },
     {
       episode_number: 3,
+      aired_at: null,
       thumbnail_url: null,
       links: [{ embed_url: "https://old.example/3" }],
     },
   ]);
+});
+
+test("mergeEpisodeLinks uses imported aired_at without erasing current dates", () => {
+  const mergeResult = mergeEpisodeLinks({
+    currentEpisodes: [{ episode_number: 1, aired_at: null, thumbnail_url: null, links: [] }],
+    importedEpisodes: [
+      {
+        episode_number: 1,
+        aired_at: "1999-10-20T00:00:00+00:00",
+        thumbnail_url: null,
+        links: [{ embed_url: "https://new.example/1" }],
+      },
+    ],
+    strategy: EPISODE_LINK_IMPORT_STRATEGY.MERGE,
+  });
+  assert.equal(mergeResult.episodes[0].aired_at, "1999-10-20T00:00:00Z");
+
+  const replaceResult = mergeEpisodeLinks({
+    currentEpisodes: [
+      {
+        episode_number: 1,
+        aired_at: "1999-10-20T00:00:00Z",
+        thumbnail_url: null,
+        links: [{ embed_url: "https://old.example/1" }],
+      },
+    ],
+    importedEpisodes: [
+      {
+        episode_number: 1,
+        aired_at: null,
+        thumbnail_url: null,
+        links: [{ embed_url: "https://new.example/1" }],
+      },
+    ],
+    strategy: EPISODE_LINK_IMPORT_STRATEGY.REPLACE_IMPORTED,
+  });
+  assert.equal(replaceResult.episodes[0].aired_at, "1999-10-20T00:00:00Z");
 });
 
 test("calculateEpisodeImportSummary reflects strategy-sensitive creates and updates", () => {

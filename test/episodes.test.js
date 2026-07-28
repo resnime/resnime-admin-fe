@@ -10,6 +10,7 @@ test("mergeEpisodeRange appends missing episodes without duplicates and sorts as
     [1, 2, 3],
   );
   assert.equal(result.find((episode) => episode.episode_number === 1).thumbnail_url, null);
+  assert.equal(result.find((episode) => episode.episode_number === 1).aired_at, null);
 });
 
 test("mergeEpisodeRange rejects invalid ranges", () => {

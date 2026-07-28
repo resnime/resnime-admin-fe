@@ -21,6 +21,7 @@ test("fill missing fields only fills empty values and keeps reviewed data", () =
       episodes: [
         {
           episode_number: 1,
+          aired_at: "1999-10-20T00:00:00Z",
           thumbnail_url: "https://custom-thumbnail.jpg",
           links: [{ embed_url: "https://stream.example/episode-1" }],
         },
@@ -54,6 +55,7 @@ test("fill missing fields only fills empty values and keeps reviewed data", () =
   assert.deepEqual(result.episodes, [
     {
       episode_number: 1,
+      aired_at: "1999-10-20T00:00:00Z",
       thumbnail_url: "https://custom-thumbnail.jpg",
       links: [{ embed_url: "https://stream.example/episode-1" }],
     },
@@ -76,7 +78,7 @@ test("fill missing fields uses nested scraped arrays when current arrays are emp
     { name: "Luffy", photo: "", role: "Main", voice_actors: [] },
   ]);
   assert.deepEqual(result.episodes, [
-    { episode_number: 1, thumbnail_url: null, links: [] },
+    { episode_number: 1, aired_at: null, thumbnail_url: null, links: [] },
   ]);
 });
 
@@ -91,7 +93,7 @@ test("replace scraped data keeps current values when scraped values are empty", 
       genres: ["Adventure"],
       characters: [{ name: "Gon", voice_actors: [] }],
       episode_total: 148,
-      episodes: [{ episode_number: 1, thumbnail_url: null, links: [] }],
+      episodes: [{ episode_number: 1, aired_at: "1999-10-20T00:00:00Z", thumbnail_url: null, links: [] }],
     },
     scrapedData: {
       id: "999",
@@ -115,7 +117,7 @@ test("replace scraped data keeps current values when scraped values are empty", 
   ]);
   assert.equal(result.episode_total, 148);
   assert.deepEqual(result.episodes, [
-    { episode_number: 1, thumbnail_url: null, links: [] },
+    { episode_number: 1, aired_at: "1999-10-20T00:00:00Z", thumbnail_url: null, links: [] },
   ]);
 });
 
@@ -130,6 +132,7 @@ test("replace scraped data replaces meaningful fields and preserves episode link
       episodes: [
         {
           episode_number: 1,
+          aired_at: "1999-10-20T00:00:00Z",
           thumbnail_url: "https://custom-thumbnail.jpg",
           links: [{ embed_url: "https://stream.example/episode-1" }],
         },
@@ -147,11 +150,13 @@ test("replace scraped data replaces meaningful fields and preserves episode link
       episodes: [
         {
           episode_number: 1,
+          aired_at: null,
           thumbnail_url: "https://scraped-thumbnail.jpg",
           links: [{ embed_url: "https://scraped.example/episode-1" }],
         },
         {
           episode_number: 2,
+          aired_at: "1999-10-27T00:00:00+00:00",
           thumbnail_url: "https://episode-2.jpg",
           links: [],
         },
@@ -168,9 +173,10 @@ test("replace scraped data replaces meaningful fields and preserves episode link
   assert.deepEqual(result.episodes, [
     {
       episode_number: 1,
+      aired_at: "1999-10-20T00:00:00Z",
       thumbnail_url: "https://custom-thumbnail.jpg",
       links: [{ embed_url: "https://stream.example/episode-1" }],
     },
-    { episode_number: 2, thumbnail_url: "https://episode-2.jpg", links: [] },
+    { episode_number: 2, aired_at: "1999-10-27T00:00:00Z", thumbnail_url: "https://episode-2.jpg", links: [] },
   ]);
 });

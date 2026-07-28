@@ -504,7 +504,7 @@ export default function BulkImport({ messageApi }) {
             Back to Bulk List
           </Button>
           <Button
-            onClick={() => setPreviewAnime(bulkForm.getFieldsValue(true))}
+            onClick={() => setPreviewAnime(normalizeBulkItem(bulkForm.getFieldsValue(true)))}
           >
             Update Preview
           </Button>

@@ -1,3 +1,8 @@
+import {
+  isValidEpisodeAiredAt,
+  normalizeEpisodeAiredAt,
+} from "./episodeDate.js";
+
 export const EPISODE_LINK_IMPORT_STRATEGY = {
   MERGE: "merge",
   REPLACE_IMPORTED: "replace_imported",
@@ -42,14 +47,21 @@ export function parseEpisodeLinksJson(fileText) {
     }
 
     const thumbnailUrl = normalizeThumbnailUrl(item?.thumbnail_url, episodeNumber, warnings);
+    if (!isValidEpisodeAiredAt(item?.aired_at)) {
+      errors.push(`Episode ${episodeNumber}: aired_at must be a valid ISO 8601 date string or null.`);
+      return;
+    }
+    const airedAt = normalizeEpisodeAiredAt(item?.aired_at);
     const existing = byEpisodeNumber.get(episodeNumber);
     if (existing) duplicateEpisodesMerged += 1;
     const merged = existing || {
       episode_number: episodeNumber,
+      aired_at: null,
       thumbnail_url: null,
       links: [],
     };
 
+    if (!merged.aired_at && airedAt) merged.aired_at = airedAt;
     if (!merged.thumbnail_url && thumbnailUrl) merged.thumbnail_url = thumbnailUrl;
     const seenLinks = new Set(merged.links.map((link) => link.embed_url));
     linkResult.links.forEach((link) => {
@@ -106,6 +118,7 @@ export function mergeEpisodeLinks({
     if (strategy === EPISODE_LINK_IMPORT_STRATEGY.REPLACE_IMPORTED) {
       currentByNumber.set(episodeNumber, {
         episode_number: episodeNumber,
+        aired_at: importedClone.aired_at || currentEpisode.aired_at || null,
         thumbnail_url: importedClone.thumbnail_url || currentEpisode.thumbnail_url || null,
         links: importedClone.links,
       });
@@ -122,6 +135,7 @@ export function mergeEpisodeLinks({
     });
     currentByNumber.set(episodeNumber, {
       episode_number: episodeNumber,
+      aired_at: currentEpisode.aired_at || importedClone.aired_at || null,
       thumbnail_url: currentEpisode.thumbnail_url || importedClone.thumbnail_url || null,
       links: nextLinks,
     });
@@ -240,6 +254,7 @@ function isHttpUrl(value) {
 function cloneEpisode(episode) {
   return {
     episode_number: Number(episode.episode_number),
+    aired_at: normalizeEpisodeAiredAt(episode?.aired_at),
     thumbnail_url: episode.thumbnail_url || null,
     links: Array.isArray(episode.links)
       ? episode.links
