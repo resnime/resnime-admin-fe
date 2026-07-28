@@ -85,7 +85,8 @@ body {
   margin-top: 16px;
 }
 
-.character-preview-scroll {
+.character-preview-scroll,
+.episode-preview-scroll {
   max-height: 520px;
   overflow-y: auto;
   padding-right: 6px;

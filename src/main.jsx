@@ -1,6 +1,7 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
 import { ConfigProvider } from "antd";
+import { BrowserRouter } from "react-router";
 import App from "./App.jsx";
 import "./styles.css";
 
@@ -14,7 +15,9 @@ createRoot(document.getElementById("root")).render(
         },
       }}
     >
-      <App />
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
     </ConfigProvider>
   </React.StrictMode>,
 );

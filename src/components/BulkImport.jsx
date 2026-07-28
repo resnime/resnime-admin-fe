@@ -2,6 +2,7 @@ import {
   Alert,
   Button,
   Card,
+  Collapse,
   Empty,
   Form,
   Image,
@@ -23,10 +24,15 @@ import {
   RollbackOutlined,
   SyncOutlined,
 } from "@ant-design/icons";
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { useNavigate, useParams } from "react-router";
 import AnimeForm from "./AnimeForm.jsx";
 import AnimePreview from "./AnimePreview.jsx";
-import { bulkUpsertAnime, scrapeAnime, submitAnimeToTurso } from "../services/animeApi.js";
+import {
+  bulkUpsertAnime,
+  scrapeAnime,
+  submitAnimeToTurso,
+} from "../services/animeApi.js";
 import {
   BULK_STORAGE_KEY,
   emptyBulkAnime,
@@ -40,6 +46,7 @@ import {
   mergeScrapedAnimeData,
   willReplaceRemoveEpisodes,
 } from "../utils/mergeScrapedAnimeData.js";
+import { getBulkReviewItem } from "../utils/routes.js";
 
 const { Dragger } = Upload;
 const { Paragraph, Text } = Typography;
@@ -51,9 +58,11 @@ function readStoredItems() {
 
 export default function BulkImport({ messageApi }) {
   const [bulkForm] = Form.useForm();
+  const { animeId } = useParams();
+  const navigate = useNavigate();
   const [items, setItems] = useState(readStoredItems);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-  const [activeId, setActiveId] = useState(null);
+  const [storageRestored, setStorageRestored] = useState(false);
   const [previewAnime, setPreviewAnime] = useState(emptyBulkAnime);
   const [uploadReport, setUploadReport] = useState(null);
   const [rowLoadingId, setRowLoadingId] = useState(null);
@@ -64,8 +73,41 @@ export default function BulkImport({ messageApi }) {
     SCRAPE_MERGE_STRATEGY.FILL_MISSING,
   );
   const [rescraping, setRescraping] = useState(false);
+  const reviewLoadedIdRef = useRef(null);
 
-  const activeItem = items.find((item) => item.id === activeId);
+  const activeItem = getBulkReviewItem(items, animeId);
+
+  useEffect(() => {
+    setStorageRestored(true);
+  }, []);
+
+  useEffect(() => {
+    if (!animeId) {
+      reviewLoadedIdRef.current = null;
+      return;
+    }
+
+    if (!storageRestored) return;
+
+    if (!activeItem) {
+      if (reviewLoadedIdRef.current !== `missing:${animeId}`) {
+        reviewLoadedIdRef.current = `missing:${animeId}`;
+        messageApi.warning(
+          "Anime data was not found in the current bulk list.",
+        );
+        navigate("/bulk", { replace: true });
+      }
+      return;
+    }
+
+    if (reviewLoadedIdRef.current === String(activeItem.id)) return;
+
+    const normalized = normalizeBulkItem(activeItem);
+    bulkForm.setFieldsValue(normalized);
+    setPreviewAnime(normalized);
+    setReviewDirty(false);
+    reviewLoadedIdRef.current = String(activeItem.id);
+  }, [activeItem, animeId, bulkForm, messageApi, navigate, storageRestored]);
 
   const saveItems = (nextItems) => {
     setItems(nextItems);
@@ -79,16 +121,12 @@ export default function BulkImport({ messageApi }) {
   };
 
   const openReview = (item) => {
-    const normalized = normalizeBulkItem(item);
-    setActiveId(item.id);
-    bulkForm.setFieldsValue(normalized);
-    setPreviewAnime(normalized);
-    setReviewDirty(false);
+    navigate(`/bulk/${encodeURIComponent(item.id)}/review`);
   };
 
   const backToList = () => {
     if (!reviewDirty) {
-      setActiveId(null);
+      navigate("/bulk");
       return;
     }
 
@@ -98,16 +136,16 @@ export default function BulkImport({ messageApi }) {
         "Changes in this form are not saved until Update Bulk Data is clicked.",
       okText: "Discard",
       cancelText: "Stay",
-      onOk: () => setActiveId(null),
+      onOk: () => navigate("/bulk"),
     });
   };
 
   const updateActiveItem = async () => {
     await bulkForm.validateFields();
     const values = normalizeBulkItem(bulkForm.getFieldsValue(true));
-    const id = activeId;
+    const id = activeItem.id;
     const nextItems = items.map((item) =>
-      item.id === id
+      String(item.id) === String(id)
         ? {
             ...values,
             id,
@@ -118,7 +156,7 @@ export default function BulkImport({ messageApi }) {
     saveItems(nextItems);
     setPreviewAnime(values);
     setReviewDirty(false);
-    setActiveId(null);
+    navigate("/bulk");
     messageApi.success("Bulk data updated.");
   };
 
@@ -193,7 +231,9 @@ export default function BulkImport({ messageApi }) {
         `${result.summary.added} added, ${result.summary.updated} updated, ${result.summary.invalidSkipped} invalid skipped.`,
       );
     } catch {
-      messageApi.error("JSON file could not be parsed. Existing bulk data was kept.");
+      messageApi.error(
+        "JSON file could not be parsed. Existing bulk data was kept.",
+      );
     }
 
     return Upload.LIST_IGNORE;
@@ -211,7 +251,6 @@ export default function BulkImport({ messageApi }) {
         saveItems([]);
         localStorage.removeItem(BULK_STORAGE_KEY);
         setSelectedRowKeys([]);
-        setActiveId(null);
         setUploadReport(null);
       },
     });
@@ -219,7 +258,9 @@ export default function BulkImport({ messageApi }) {
 
   const applyResults = (results) => {
     const succeededIds = new Set(
-      results.filter((result) => result.success).map((result) => result.anime_id),
+      results
+        .filter((result) => result.success)
+        .map((result) => result.anime_id),
     );
     const failedIds = new Set(
       results
@@ -276,7 +317,9 @@ export default function BulkImport({ messageApi }) {
       onOk: async () => {
         setBulkSubmitting(true);
         try {
-          const response = await bulkUpsertAnime(selectedItems.map(stripBulkMetadata));
+          const response = await bulkUpsertAnime(
+            selectedItems.map(stripBulkMetadata),
+          );
           const { failedIds } = applyResults(response.results);
           const summary = response.summary;
           if (failedIds.length) {
@@ -387,6 +430,14 @@ export default function BulkImport({ messageApi }) {
     },
   ];
 
+  if (animeId && !activeItem) {
+    return (
+      <section className="section">
+        <Empty description="Loading bulk review..." />
+      </section>
+    );
+  }
+
   if (activeItem) {
     const scrapeAgainButton = (
       <Button
@@ -394,6 +445,7 @@ export default function BulkImport({ messageApi }) {
         loading={rescraping}
         disabled={rescraping}
         onClick={openScrapeModal}
+        type="primary"
       >
         {rescraping ? "Scraping..." : "Scrape Again"}
       </Button>
@@ -415,8 +467,8 @@ export default function BulkImport({ messageApi }) {
         >
           <Space direction="vertical" size="middle" className="full-width">
             <Text>
-              Scrape the latest available anime data using MAL ID {activeItem.id} and
-              apply it to the current review form.
+              Scrape the latest available anime data using MAL ID{" "}
+              {activeItem.id} and apply it to the current review form.
             </Text>
             <Radio.Group
               className="full-width"
@@ -429,8 +481,8 @@ export default function BulkImport({ messageApi }) {
                   <Space direction="vertical" size={0}>
                     <Text strong>Fill Missing Fields</Text>
                     <Text type="secondary">
-                      Only fill fields that are currently empty. Existing reviewed data
-                      will be preserved.
+                      Only fill fields that are currently empty. Existing
+                      reviewed data will be preserved.
                     </Text>
                   </Space>
                 </Radio>
@@ -438,8 +490,8 @@ export default function BulkImport({ messageApi }) {
                   <Space direction="vertical" size={0}>
                     <Text strong>Replace with Scraped Data</Text>
                     <Text type="secondary">
-                      Replace available fields with the latest scraped values while
-                      preserving manually added episode links.
+                      Replace available fields with the latest scraped values
+                      while preserving manually added episode links.
                     </Text>
                   </Space>
                 </Radio>
@@ -451,7 +503,9 @@ export default function BulkImport({ messageApi }) {
           <Button icon={<RollbackOutlined />} onClick={backToList}>
             Back to Bulk List
           </Button>
-          <Button onClick={() => setPreviewAnime(bulkForm.getFieldsValue(true))}>
+          <Button
+            onClick={() => setPreviewAnime(bulkForm.getFieldsValue(true))}
+          >
             Update Preview
           </Button>
           <Button
@@ -467,8 +521,27 @@ export default function BulkImport({ messageApi }) {
           layout="vertical"
           onValuesChange={() => setReviewDirty(true)}
         >
-          <AnimePreview anime={previewAnime} />
-          <AnimeForm form={bulkForm} mode="bulk" metadataExtra={scrapeAgainButton} />
+          <Collapse
+            defaultActiveKey={["preview", "form"]}
+            items={[
+              {
+                key: "preview",
+                label: "Anime Preview",
+                children: <AnimePreview anime={previewAnime} />,
+              },
+              {
+                key: "form",
+                label: "Anime Form Data",
+                children: (
+                  <AnimeForm
+                    form={bulkForm}
+                    mode="bulk"
+                    metadataExtra={scrapeAgainButton}
+                  />
+                ),
+              },
+            ]}
+          />
         </Form>
       </section>
     );
@@ -505,13 +578,18 @@ export default function BulkImport({ messageApi }) {
                 icon={<CheckSquareOutlined />}
                 onClick={() =>
                   setSelectedRowKeys(
-                    items.filter((item) => item.is_reviewed).map((item) => item.id),
+                    items
+                      .filter((item) => item.is_reviewed)
+                      .map((item) => item.id),
                   )
                 }
               >
                 Select All Reviewed
               </Button>
-              <Button icon={<ClearOutlined />} onClick={() => setSelectedRowKeys([])}>
+              <Button
+                icon={<ClearOutlined />}
+                onClick={() => setSelectedRowKeys([])}
+              >
                 Clear Selection
               </Button>
               <Button
@@ -566,7 +644,10 @@ function UploadSummary({ report }) {
       description={
         skipped.length
           ? skipped
-              .map((item) => `${item.anime_id || `index ${item.index}`}: ${item.reason}`)
+              .map(
+                (item) =>
+                  `${item.anime_id || `index ${item.index}`}: ${item.reason}`,
+              )
               .join("; ")
           : null
       }
@@ -597,7 +678,12 @@ function Summary({ items }) {
 }
 
 function displayTitle(item) {
-  return item.title_en || item.title_romaji || item.title_native || `MAL ID ${item.id}`;
+  return (
+    item.title_en ||
+    item.title_romaji ||
+    item.title_native ||
+    `MAL ID ${item.id}`
+  );
 }
 
 function buttonLabel(item) {

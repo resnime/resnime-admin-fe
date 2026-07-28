@@ -8,7 +8,10 @@ test("Bulk review re-scrape reuses manual scraper and only applies to active for
     "utf8",
   );
 
-  assert.match(bulkImport, /import \{ bulkUpsertAnime, scrapeAnime, submitAnimeToTurso \}/);
+  assert.match(
+    bulkImport,
+    /import \{\s*bulkUpsertAnime,\s*scrapeAnime,\s*submitAnimeToTurso,\s*\}/,
+  );
   assert.match(bulkImport, /Scrape Again/);
   assert.match(bulkImport, /Scrape Anime Again/);
   assert.match(bulkImport, /Fill Missing Fields/);

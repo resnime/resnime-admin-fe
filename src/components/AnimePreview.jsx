@@ -49,12 +49,29 @@ export default function AnimePreview({ anime }) {
             )}
           </Col>
           <Col xs={24} md={17} lg={19}>
-            <Title level={4}>
+            <Title
+              level={4}
+              copyable={anime.title_en ? { text: anime.title_en } : false}
+            >
               {anime.title_en || "Untitled English title"}
             </Title>
             <Space orientation="vertical" size={0}>
-              <Text type="secondary">Native Title: {anime.title_native || "-"}</Text>
-              <Text type="secondary">Romaji Title: {anime.title_romaji || "-"}</Text>
+              <Text
+                type="secondary"
+                copyable={
+                  anime.title_native ? { text: anime.title_native } : false
+                }
+              >
+                Native Title: {anime.title_native || "-"}
+              </Text>
+              <Text
+                type="secondary"
+                copyable={
+                  anime.title_romaji ? { text: anime.title_romaji } : false
+                }
+              >
+                Romaji Title: {anime.title_romaji || "-"}
+              </Text>
             </Space>
             <Descriptions
               className="meta"
@@ -96,20 +113,23 @@ export default function AnimePreview({ anime }) {
       <Row gutter={[16, 16]} className="preview-lists">
         <Col xs={24} lg={12}>
           <Card title="Episodes">
-            <List
-              locale={{ emptyText: "No episodes created yet" }}
-              dataSource={episodes}
-              renderItem={(episode) => (
-                <List.Item>
-                  <Text>Episode {episode.episode_number}</Text>
-                  <Text type="secondary">
-                    {(episode.links || []).length} embed URL
-                  </Text>
-                </List.Item>
-              )}
-            />
+            <div className="episode-preview-scroll">
+              <List
+                locale={{ emptyText: "No episodes created yet" }}
+                dataSource={episodes}
+                renderItem={(episode) => (
+                  <List.Item>
+                    <Text>Episode {episode.episode_number}</Text>
+                    <Text type="secondary">
+                      {(episode.links || []).length} embed URL
+                    </Text>
+                  </List.Item>
+                )}
+              />
+            </div>
           </Card>
         </Col>
+
         <Col xs={24} lg={12}>
           <Card title="Characters">
             <div className="character-preview-scroll">
@@ -130,7 +150,11 @@ export default function AnimePreview({ anime }) {
                         ) : null
                       }
                       title={`${character.name || "Unnamed character"}${character.role ? ` - ${character.role}` : ""}`}
-                      description={<VoiceActorPreview voiceActors={character.voice_actors || []} />}
+                      description={
+                        <VoiceActorPreview
+                          voiceActors={character.voice_actors || []}
+                        />
+                      }
                     />
                   </List.Item>
                 )}
@@ -162,7 +186,9 @@ function VoiceActorPreview({ voiceActors }) {
           ) : null}
           <span>
             {actor.name || "Unnamed voice actor"}
-            {actor.country ? <Text type="secondary"> - {actor.country}</Text> : null}
+            {actor.country ? (
+              <Text type="secondary"> - {actor.country}</Text>
+            ) : null}
           </span>
         </Space>
       ))}
