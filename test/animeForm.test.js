@@ -12,6 +12,18 @@ test("Anime form editors expose scroll wrappers", async () => {
   assert.match(characterEditor, /character-editor-scroll/);
 });
 
+test("Character editor can clear characters without touching preview", async () => {
+  const [animeForm, characterEditor] = await Promise.all([
+    readFile(new URL("../src/components/AnimeForm.jsx", import.meta.url), "utf8"),
+    readFile(new URL("../src/components/CharacterEditor.jsx", import.meta.url), "utf8"),
+  ]);
+
+  assert.match(animeForm, /<CharacterEditor form=\{form\} \/>/);
+  assert.match(characterEditor, /Delete All/);
+  assert.match(characterEditor, /form\.setFieldsValue\(\{\s*characters: \[\]\s*\}\)/);
+  assert.doesNotMatch(characterEditor, /setPreviewAnime|previewAnime|Update Preview/);
+});
+
 test("Episode editor exposes local episode link JSON import", async () => {
   const episodeEditor = await readFile(
     new URL("../src/components/EpisodeEditor.jsx", import.meta.url),

@@ -10,7 +10,7 @@ test("Bulk review re-scrape reuses manual scraper and only applies to active for
 
   assert.match(
     bulkImport,
-    /import \{\s*bulkUpsertAnime,\s*scrapeAnime,\s*submitAnimeToTurso,\s*\}/,
+    /import \{[\s\S]*bulkUpsertAnime,[\s\S]*scrapeAnime,[\s\S]*submitAnimeToTurso,[\s\S]*\} from "\.\.\/services\/animeApi\.js"/,
   );
   assert.match(bulkImport, /Scrape Again/);
   assert.match(bulkImport, /Scrape Anime Again/);

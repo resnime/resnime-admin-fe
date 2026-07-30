@@ -30,6 +30,7 @@ import AnimeForm from "./AnimeForm.jsx";
 import AnimePreview from "./AnimePreview.jsx";
 import {
   bulkUpsertAnime,
+  fetchAnimeFromTurso,
   scrapeAnime,
   submitAnimeToTurso,
 } from "../services/animeApi.js";
@@ -73,6 +74,7 @@ export default function BulkImport({ messageApi }) {
     SCRAPE_MERGE_STRATEGY.FILL_MISSING,
   );
   const [rescraping, setRescraping] = useState(false);
+  const [fetchingTursoAnime, setFetchingTursoAnime] = useState(false);
   const reviewLoadedIdRef = useRef(null);
 
   const activeItem = getBulkReviewItem(items, animeId);
@@ -209,6 +211,29 @@ export default function BulkImport({ messageApi }) {
       );
     } finally {
       setRescraping(false);
+    }
+  };
+
+  const handleFetchFromTurso = async () => {
+    if (!activeItem || fetchingTursoAnime) return;
+
+    setFetchingTursoAnime(true);
+    try {
+      const result = await fetchAnimeFromTurso(activeItem.id);
+      const fetchedAnime = normalizeBulkItem({
+        ...result.data,
+        id: activeItem.id,
+        is_reviewed: activeItem.is_reviewed,
+        import_status: activeItem.import_status,
+      });
+      bulkForm.setFieldsValue(fetchedAnime);
+      setPreviewAnime(fetchedAnime);
+      setReviewDirty(true);
+      messageApi.success("Turso data has been applied to the review form.");
+    } catch (error) {
+      messageApi.error(error.message);
+    } finally {
+      setFetchingTursoAnime(false);
     }
   };
 
@@ -504,7 +529,17 @@ export default function BulkImport({ messageApi }) {
             Back to Bulk List
           </Button>
           <Button
-            onClick={() => setPreviewAnime(normalizeBulkItem(bulkForm.getFieldsValue(true)))}
+            icon={<DatabaseOutlined />}
+            loading={fetchingTursoAnime}
+            disabled={fetchingTursoAnime}
+            onClick={handleFetchFromTurso}
+          >
+            Fetch from Turso
+          </Button>
+          <Button
+            onClick={() =>
+              setPreviewAnime(normalizeBulkItem(bulkForm.getFieldsValue(true)))
+            }
           >
             Update Preview
           </Button>
@@ -516,6 +551,7 @@ export default function BulkImport({ messageApi }) {
             Update Bulk Data
           </Button>
         </Space>
+
         <Form
           form={bulkForm}
           layout="vertical"

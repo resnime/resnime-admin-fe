@@ -12,9 +12,20 @@ import {
 import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
 import React from "react";
 
-export default function CharacterEditor() {
+export default function CharacterEditor({ form }) {
   return (
-    <Card title="Characters">
+    <Card
+      title="Characters"
+      extra={
+        <Button
+          danger
+          icon={<DeleteOutlined />}
+          onClick={() => form.setFieldsValue({ characters: [] })}
+        >
+          Delete All
+        </Button>
+      }
+    >
       <Form.List name="characters">
         {(fields, { add, remove }) => (
           <Space direction="vertical" size="middle" className="full-width">

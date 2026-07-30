@@ -148,7 +148,7 @@ export default function AnimeForm({ form, mode = "manual", metadataExtra = null 
         </Card>
 
         <EpisodeEditor form={form} />
-        <CharacterEditor />
+        <CharacterEditor form={form} />
       </Space>
     </section>
   );
