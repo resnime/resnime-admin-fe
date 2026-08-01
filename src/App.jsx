@@ -24,7 +24,11 @@ import {
 import AnimeForm from "./components/AnimeForm.jsx";
 import AnimePreview from "./components/AnimePreview.jsx";
 
-import { scrapeAnime, submitAnimeToTurso } from "./services/animeApi.js";
+import {
+  fetchAnimeFromTurso,
+  scrapeAnime,
+  submitAnimeToTurso,
+} from "./services/animeApi.js";
 import { normalizeAnimeEpisodeDates } from "./utils/episodeDate.js";
 import { getActiveMode } from "./utils/routes.js";
 
@@ -57,6 +61,7 @@ export default function App() {
   const [scrapeForm] = Form.useForm();
   const [animeForm] = Form.useForm();
   const [loading, setLoading] = useState(false);
+  const [fetchingTursoAnime, setFetchingTursoAnime] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [warnings, setWarnings] = useState([]);
   const [hasData, setHasData] = useState(false);
@@ -73,7 +78,10 @@ export default function App() {
     setWarnings([]);
     try {
       const result = await scrapeAnime(String(malId));
-      const scrapedAnime = normalizeAnimeEpisodeDates({ ...emptyAnime, ...result.data });
+      const scrapedAnime = normalizeAnimeEpisodeDates({
+        ...emptyAnime,
+        ...result.data,
+      });
       animeForm.setFieldsValue(scrapedAnime);
       setPreviewAnime(scrapedAnime);
       setHasData(true);
@@ -82,6 +90,36 @@ export default function App() {
       messageApi.error(error.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleFetchFromTurso = async () => {
+    if (fetchingTursoAnime) return;
+
+    const malId =
+      animeForm.getFieldValue("id") || scrapeForm.getFieldValue("malId");
+    if (!Number.isInteger(Number(malId)) || Number(malId) <= 0) {
+      messageApi.error("Masukkan MyAnimeList ID yang valid.");
+      return;
+    }
+
+    setFetchingTursoAnime(true);
+    setWarnings([]);
+    try {
+      const result = await fetchAnimeFromTurso(malId);
+      const fetchedAnime = normalizeAnimeEpisodeDates({
+        ...emptyAnime,
+        ...result.data,
+      });
+      animeForm.setFieldsValue(fetchedAnime);
+      scrapeForm.setFieldsValue({ malId: fetchedAnime.id });
+      setPreviewAnime(fetchedAnime);
+      setHasData(true);
+      messageApi.success("Turso data has been applied to the form.");
+    } catch (error) {
+      messageApi.error(error.message);
+    } finally {
+      setFetchingTursoAnime(false);
     }
   };
 
@@ -181,11 +219,13 @@ export default function App() {
                   scrapeForm={scrapeForm}
                   animeForm={animeForm}
                   loading={loading}
+                  fetchingTursoAnime={fetchingTursoAnime}
                   submitting={submitting}
                   warnings={warnings}
                   hasData={hasData}
                   previewAnime={previewAnime}
                   handleScrape={handleScrape}
+                  handleFetchFromTurso={handleFetchFromTurso}
                   handleSubmitToTurso={handleSubmitToTurso}
                   updatePreview={updatePreview}
                 />
@@ -211,11 +251,13 @@ function ManualInput({
   scrapeForm,
   animeForm,
   loading,
+  fetchingTursoAnime,
   submitting,
   warnings,
   hasData,
   previewAnime,
   handleScrape,
+  handleFetchFromTurso,
   handleSubmitToTurso,
   updatePreview,
 }) {
@@ -278,6 +320,15 @@ function ManualInput({
       </Form>
       {hasData ? (
         <Space className="fixed-form-actions">
+          <Button
+            size="large"
+            icon={<DatabaseOutlined />}
+            loading={fetchingTursoAnime}
+            disabled={fetchingTursoAnime}
+            onClick={handleFetchFromTurso}
+          >
+            Fetch from Turso
+          </Button>
           <Button size="large" onClick={updatePreview}>
             Update Preview
           </Button>
