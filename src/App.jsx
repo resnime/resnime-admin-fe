@@ -130,7 +130,7 @@ export default function App() {
     Modal.confirm({
       title: "Submit anime to Turso?",
       content:
-        "Submitting the same MyAnimeList ID will update the anime and replace its episodes, embed links, characters, and voice actors with the current form data.",
+        "Submitting the same MyAnimeList ID will update the anime (including Anilist ID) and replace its episodes, embed links, characters, and voice actors with the current form data.",
       okText: "Submit",
       cancelText: "Cancel",
       onOk: async () => {

@@ -26,7 +26,9 @@ export const emptyBulkAnime = {
 };
 
 export function normalizeBulkUploadItems(uploadedItems, existingItems = []) {
-  const existingById = new Map(existingItems.map((item) => [String(item.id), item]));
+  const existingById = new Map(
+    existingItems.map((item) => [String(item.id), item]),
+  );
   const uploadedIds = new Set();
   const nextById = new Map(existingById);
   const skipped = [];
@@ -98,6 +100,7 @@ export function normalizeBulkItem(item) {
   return {
     ...anime,
     id: normalizeMalId(item?.id),
+    anilist_id: item?.anilist_id || null,
     is_reviewed: item?.is_reviewed === true,
     import_status: normalizeImportStatus(item?.import_status),
   };
@@ -119,7 +122,10 @@ function normalizeAnime(item) {
     title_native: normalizeString(source.title_native),
     title_romaji: normalizeString(source.title_romaji),
     photo: normalizeString(source.photo),
-    rating: typeof source.rating === "number" && Number.isFinite(source.rating) ? source.rating : 0,
+    rating:
+      typeof source.rating === "number" && Number.isFinite(source.rating)
+        ? source.rating
+        : 0,
     status: normalizeString(source.status) || "Ongoing",
     aired: normalizeString(source.aired),
     season: normalizeString(source.season),
@@ -127,13 +133,20 @@ function normalizeAnime(item) {
     studio: normalizeString(source.studio),
     description: normalizeString(source.description),
     banner_bg_img: normalizeString(source.banner_bg_img),
-    genres: Array.isArray(source.genres) ? source.genres.filter((genre) => typeof genre === "string") : [],
+    genres: Array.isArray(source.genres)
+      ? source.genres.filter((genre) => typeof genre === "string")
+      : [],
     episode_total:
-      typeof source.episode_total === "number" && Number.isFinite(source.episode_total)
+      typeof source.episode_total === "number" &&
+      Number.isFinite(source.episode_total)
         ? source.episode_total
         : null,
-    episodes: Array.isArray(source.episodes) ? source.episodes.map(normalizeEpisode) : [],
-    characters: Array.isArray(source.characters) ? source.characters.map(normalizeCharacter) : [],
+    episodes: Array.isArray(source.episodes)
+      ? source.episodes.map(normalizeEpisode)
+      : [],
+    characters: Array.isArray(source.characters)
+      ? source.characters.map(normalizeCharacter)
+      : [],
   };
 }
 
@@ -211,7 +224,8 @@ function stripInternalKeys(value, isRoot = false) {
   return Object.fromEntries(
     Object.entries(value)
       .filter(([key]) => {
-        if (key === "is_reviewed" || key === "import_status" || key === "key") return false;
+        if (key === "is_reviewed" || key === "import_status" || key === "key")
+          return false;
         if (!isRoot && key === "id") return false;
         return true;
       })

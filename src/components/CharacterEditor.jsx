@@ -13,6 +13,45 @@ import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
 import React from "react";
 
 export default function CharacterEditor({ form }) {
+  const formatUrl = (url) =>
+    url ? url.replace(/\/r\/\d+x\d+\//, "/").split("?")[0] : url;
+
+  const onFormatHDPhotos = () => {
+    const characters = form.getFieldValue("characters") || [];
+    let updated = false;
+    const newCharacters = characters.map((character) => {
+      if (!character) return character;
+
+      const newChar = { ...character };
+
+      if (newChar.photo) {
+        const newPhoto = formatUrl(newChar.photo);
+        if (newPhoto !== newChar.photo) {
+          newChar.photo = newPhoto;
+          updated = true;
+        }
+      }
+
+      if (newChar.voice_actors?.length) {
+        newChar.voice_actors = newChar.voice_actors.map((va) => {
+          if (va.photo) {
+            const newPhoto = formatUrl(va.photo);
+            if (newPhoto !== va.photo) {
+              updated = true;
+              return { ...va, photo: newPhoto };
+            }
+          }
+          return va;
+        });
+      }
+
+      return newChar;
+    });
+
+    if (updated) {
+      form.setFieldsValue({ characters: newCharacters });
+    }
+  };
   return (
     <Card
       title="Characters"
@@ -29,14 +68,19 @@ export default function CharacterEditor({ form }) {
       <Form.List name="characters">
         {(fields, { add, remove }) => (
           <Space direction="vertical" size="middle" className="full-width">
-            <Button
-              icon={<PlusOutlined />}
-              onClick={() =>
-                add({ name: "", photo: "", role: "", voice_actors: [] })
-              }
-            >
-              Add Character
-            </Button>
+            <Space>
+              <Button
+                icon={<PlusOutlined />}
+                onClick={() =>
+                  add({ name: "", photo: "", role: "", voice_actors: [] })
+                }
+              >
+                Add Character
+              </Button>
+              <Button type="primary" onClick={onFormatHDPhotos}>
+                Formatting to HD Photos Link
+              </Button>
+            </Space>
             <div className="editor-list-scroll character-editor-scroll">
               <Collapse
                 items={fields.map((field) => ({

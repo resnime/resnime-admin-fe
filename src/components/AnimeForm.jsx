@@ -9,6 +9,7 @@ import {
   Row,
   Select,
   Space,
+  Typography,
 } from "antd";
 import React from "react";
 import EpisodeEditor from "./EpisodeEditor.jsx";
@@ -16,7 +17,11 @@ import CharacterEditor from "./CharacterEditor.jsx";
 
 const { TextArea } = Input;
 
-export default function AnimeForm({ form, mode = "manual", metadataExtra = null }) {
+export default function AnimeForm({
+  form,
+  mode = "manual",
+  metadataExtra = null,
+}) {
   return (
     <section className="section">
       <Divider orientation="left">Editable Anime Form</Divider>
@@ -39,6 +44,31 @@ export default function AnimeForm({ form, mode = "manual", metadataExtra = null 
                   {
                     pattern: /^[1-9]\d*$/,
                     message: "MAL ID must be a positive digit string.",
+                  },
+                ]}
+              >
+                <Input />
+              </Form.Item>
+
+              <Form.Item
+                extra={
+                  <Typography.Text>
+                    Search on google:{" "}
+                    <Typography.Link
+                      target="_blank"
+                      href={`https://google.com/search?q=${form?.getFieldValue("title_romaji") || ""} Anilist`}
+                    >
+                      {form?.getFieldValue("title_romaji") || ""} Anilist
+                    </Typography.Link>
+                  </Typography.Text>
+                }
+                label="Anilist ID"
+                name="anilist_id"
+                rules={[
+                  { required: true, message: "Anilist ID is required." },
+                  {
+                    pattern: /^[1-9]\d*$/,
+                    message: "Anilist ID must be a positive digit string.",
                   },
                 ]}
               >
