@@ -42,7 +42,7 @@ export function parseEpisodeLinksJson(fileText) {
       return;
     }
 
-    const linkResult = normalizeLinks(item.links, episodeNumber, errors);
+    const linkResult = normalizeLinks(item.links);
     duplicateLinksRemoved += linkResult.duplicateLinksRemoved;
     if (item.links.length === 0) {
       errors.push(
@@ -237,12 +237,12 @@ function normalizeEpisodeNumber(value) {
   return null;
 }
 
-function normalizeLinks(links, episodeNumber, errors) {
+function normalizeLinks(links) {
   const seen = new Set();
   const normalized = [];
   let duplicateLinksRemoved = 0;
 
-  links.forEach((link, index) => {
+  links.forEach((link) => {
     const embedUrl =
       typeof link?.embed_url === "string" ? link.embed_url.trim() : "";
     // if (!isHttpUrl(embedUrl)) {

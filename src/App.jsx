@@ -1,73 +1,17 @@
-import {
-  Alert,
-  Button,
-  Card,
-  ConfigProvider,
-  Form,
-  InputNumber,
-  Layout,
-  Modal,
-  Space,
-  Spin,
-  Typography,
-  message,
-  theme,
-} from "antd";
-import { DatabaseOutlined, SearchOutlined } from "@ant-design/icons";
-import React, { useState, useEffect, Suspense } from "react";
-import {
-  Navigate,
-  Route,
-  Routes,
-  useNavigate,
-} from "react-router";
-import AnimeForm from "./components/AnimeForm.jsx";
-import AnimePreview from "./components/AnimePreview.jsx";
-
-import {
-  fetchAnimeFromTurso,
-  scrapeAnime,
-  submitAnimeToTurso,
-} from "./services/animeApi.js";
-import { normalizeAnimeEpisodeDates } from "./utils/episodeDate.js";
+import { ConfigProvider, Layout, Spin, Typography, message, theme } from "antd";
+import { useState, useEffect, Suspense } from "react";
+import { Navigate, Route, Routes } from "react-router";
+import Home from "./pages/home/Home.jsx";
 
 const { Content } = Layout;
 const { Paragraph, Title } = Typography;
 
-const emptyAnime = {
-  id: "",
-  title_en: "",
-  title_native: "",
-  title_romaji: "",
-  photo: "",
-  rating: 0,
-  status: "",
-  aired: "",
-  season: "",
-  type: "",
-  studio: "",
-  description: "",
-  banner_bg_img: "",
-  genres: [],
-  episode_total: null,
-  episodes: [],
-  characters: [],
-};
-
 export default function App() {
-  const [scrapeForm] = Form.useForm();
-  const [animeForm] = Form.useForm();
-  const [loading, setLoading] = useState(false);
-  const [fetchingTursoAnime, setFetchingTursoAnime] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [warnings, setWarnings] = useState([]);
-  const [hasData, setHasData] = useState(false);
-  const [previewAnime, setPreviewAnime] = useState(emptyAnime);
   const [messageApi, contextHolder] = message.useMessage();
-  const navigate = useNavigate();
 
   const [isDarkMode, setIsDarkMode] = useState(
-    window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches
+    window.matchMedia &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches,
   );
 
   useEffect(() => {
@@ -76,107 +20,6 @@ export default function App() {
     mediaQuery.addEventListener("change", handleChange);
     return () => mediaQuery.removeEventListener("change", handleChange);
   }, []);
-  const updatePreview = () =>
-    setPreviewAnime(normalizeAnimeEpisodeDates(animeForm.getFieldsValue(true)));
-
-  const handleScrape = async ({ malId }) => {
-    setLoading(true);
-    setWarnings([]);
-    try {
-      const result = await scrapeAnime(String(malId));
-      const scrapedAnime = normalizeAnimeEpisodeDates({
-        ...emptyAnime,
-        ...result.data,
-      });
-      animeForm.setFieldsValue(scrapedAnime);
-      setPreviewAnime(scrapedAnime);
-      setHasData(true);
-      setWarnings(result.warnings || []);
-    } catch (error) {
-      messageApi.error(error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleFetchFromTurso = async () => {
-    if (fetchingTursoAnime) return;
-
-    const malId =
-      animeForm.getFieldValue("id") || scrapeForm.getFieldValue("malId");
-    if (!Number.isInteger(Number(malId)) || Number(malId) <= 0) {
-      messageApi.error("Masukkan MyAnimeList ID yang valid.");
-      return;
-    }
-
-    setFetchingTursoAnime(true);
-    setWarnings([]);
-    try {
-      const result = await fetchAnimeFromTurso(malId);
-      const fetchedAnime = normalizeAnimeEpisodeDates({
-        ...emptyAnime,
-        ...result.data,
-      });
-      animeForm.setFieldsValue(fetchedAnime);
-      scrapeForm.setFieldsValue({ malId: fetchedAnime.id });
-      setPreviewAnime(fetchedAnime);
-      setHasData(true);
-      messageApi.success("Turso data has been applied to the form.");
-    } catch (error) {
-      messageApi.error(error.message);
-    } finally {
-      setFetchingTursoAnime(false);
-    }
-  };
-
-  const handleSubmitToTurso = async () => {
-    await animeForm.validateFields();
-    const values = normalizeAnimeEpisodeDates(animeForm.getFieldsValue(true));
-
-    Modal.confirm({
-      title: "Submit anime to Turso?",
-      content:
-        "Submitting the same MyAnimeList ID will update the anime (including Anilist ID) and replace its episodes, embed links, characters, and voice actors with the current form data.",
-      okText: "Submit",
-      cancelText: "Cancel",
-      onOk: async () => {
-        setSubmitting(true);
-        try {
-          const result = await submitAnimeToTurso(values);
-          setPreviewAnime(values);
-          const operation = result.data.operation;
-          const counts = result.data.counts;
-          messageApi.success(
-            `Anime ${operation} successfully (${counts.episodes} episodes, ${counts.episode_links} links, ${counts.characters} characters, ${counts.voice_actors} voice actors)`,
-          );
-        } catch (error) {
-          showSubmitError(error);
-        } finally {
-          setSubmitting(false);
-        }
-      },
-    });
-  };
-
-  const showSubmitError = (error) => {
-    if (error.details?.length) {
-      Modal.error({
-        title: error.message,
-        content: (
-          <ul className="submit-error-list">
-            {error.details.map((detail) => (
-              <li key={`${detail.field}-${detail.message}`}>
-                <strong>{detail.field}</strong>: {detail.message}
-              </li>
-            ))}
-          </ul>
-        ),
-      });
-      return;
-    }
-
-    messageApi.error(error.message);
-  };
 
   return (
     <ConfigProvider
@@ -187,155 +30,35 @@ export default function App() {
       <Layout className="app-shell">
         {contextHolder}
         <Content className="container">
-        <header className="header">
-          <Title>Resnime Admin Importer</Title>
-          <Paragraph>
-            Tool admin untuk mengambil data MyAnimeList dan mereview hasilnya
-            secara manual sebelum masuk database.
-          </Paragraph>
-        </header>
+          <header className="header">
+            <Title>Resnime Admin Importer</Title>
+            <Paragraph>
+              Tool admin untuk mengambil data MyAnimeList dan mereview hasilnya
+              secara manual sebelum masuk database.
+            </Paragraph>
+          </header>
 
-        <Suspense
-          fallback={
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                height: "50vh",
-              }}
-            >
-              <Spin size="large" tip="Loading..." />
-            </div>
-          }
-        >
-          <Routes>
-            <Route path="/" element={<Navigate to="/manual" replace />} />
-            <Route
-              path="/manual"
-              element={
-                <ManualInput
-                  scrapeForm={scrapeForm}
-                  animeForm={animeForm}
-                  loading={loading}
-                  fetchingTursoAnime={fetchingTursoAnime}
-                  submitting={submitting}
-                  warnings={warnings}
-                  hasData={hasData}
-                  previewAnime={previewAnime}
-                  handleScrape={handleScrape}
-                  handleFetchFromTurso={handleFetchFromTurso}
-                  handleSubmitToTurso={handleSubmitToTurso}
-                  updatePreview={updatePreview}
-                />
-              }
-            />
-            <Route path="*" element={<Navigate to="/manual" replace />} />
-          </Routes>
-        </Suspense>
-      </Content>
+          <Suspense
+            fallback={
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  height: "50vh",
+                }}
+              >
+                <Spin size="large" tip="Loading..." />
+              </div>
+            }
+          >
+            <Routes>
+              <Route path="/" element={<Home messageApi={messageApi} />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </Suspense>
+        </Content>
       </Layout>
     </ConfigProvider>
-  );
-}
-
-function ManualInput({
-  scrapeForm,
-  animeForm,
-  loading,
-  fetchingTursoAnime,
-  submitting,
-  warnings,
-  hasData,
-  previewAnime,
-  handleScrape,
-  handleFetchFromTurso,
-  handleSubmitToTurso,
-  updatePreview,
-}) {
-  return (
-    <>
-      <Card className="scrape-card">
-        <Form
-          form={scrapeForm}
-          layout="inline"
-          onFinish={handleScrape}
-          className="scrape-form"
-        >
-          <Form.Item
-            label="MyAnimeList ID"
-            name="malId"
-            rules={[
-              { required: true, message: "Masukkan MyAnimeList ID." },
-              {
-                validator: (_, value) => {
-                  if (value === undefined || value === null || value === "")
-                    return Promise.resolve();
-                  return Number.isInteger(Number(value)) && Number(value) > 0
-                    ? Promise.resolve()
-                    : Promise.reject(new Error("ID harus angka positif."));
-                },
-              },
-            ]}
-          >
-            <InputNumber
-              min={1}
-              precision={0}
-              controls={false}
-              className="mal-input"
-            />
-          </Form.Item>
-          <Form.Item>
-            <Button
-              type="primary"
-              htmlType="submit"
-              loading={loading}
-              icon={<SearchOutlined />}
-            >
-              Scrape Anime
-            </Button>
-          </Form.Item>
-        </Form>
-      </Card>
-
-      {warnings.length ? (
-        <Space direction="vertical" className="full-width warning-list">
-          {warnings.map((warning) => (
-            <Alert key={warning} type="warning" showIcon message={warning} />
-          ))}
-        </Space>
-      ) : null}
-
-      <Form form={animeForm} layout="vertical" initialValues={emptyAnime}>
-        <AnimePreview anime={previewAnime} />
-        {hasData ? <AnimeForm form={animeForm} /> : null}
-      </Form>
-      {hasData ? (
-        <Space className="fixed-form-actions">
-          <Button
-            size="large"
-            icon={<DatabaseOutlined />}
-            loading={fetchingTursoAnime}
-            disabled={fetchingTursoAnime}
-            onClick={handleFetchFromTurso}
-          >
-            Fetch from Turso
-          </Button>
-          <Button size="large" onClick={updatePreview}>
-            Update Preview
-          </Button>
-          <Button
-            type="primary"
-            size="large"
-            icon={<DatabaseOutlined />}
-            loading={submitting}
-            disabled={submitting}
-            onClick={handleSubmitToTurso}
-          >
-            Submit to Turso
-          </Button>
-        </Space>
-      ) : null}
-    </>
   );
 }

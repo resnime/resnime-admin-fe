@@ -1,6 +1,5 @@
 import {
   Card,
-  Checkbox,
   Col,
   Divider,
   Form,
@@ -11,14 +10,15 @@ import {
   Space,
   Typography,
 } from "antd";
-import React from "react";
-import EpisodeEditor from "./EpisodeEditor.jsx";
+
+import EpisodeEditor from "./episode/EpisodeEditor.jsx";
 import CharacterEditor from "./CharacterEditor.jsx";
 
 const { TextArea } = Input;
 
 export default function AnimeForm({
   form,
+  formValues,
   metadataExtra = null,
 }) {
   return (
@@ -170,7 +170,11 @@ export default function AnimeForm({
           </Row>
         </Card>
 
-        <EpisodeEditor form={form} />
+        <EpisodeEditor 
+          form={form} 
+          episodeTotal={formValues?.episode_total}
+          episodes={formValues?.episodes || []}
+        />
         <CharacterEditor form={form} />
       </Space>
     </section>

@@ -10,7 +10,7 @@ import {
   Space,
 } from "antd";
 import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
-import React from "react";
+
 
 export default function CharacterEditor({ form }) {
   const formatUrl = (url) =>
