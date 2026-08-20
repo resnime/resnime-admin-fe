@@ -2,23 +2,23 @@ import {
   Alert,
   Button,
   Card,
+  ConfigProvider,
   Form,
   InputNumber,
   Layout,
   Modal,
-  Segmented,
   Space,
   Spin,
   Typography,
   message,
+  theme,
 } from "antd";
 import { DatabaseOutlined, SearchOutlined } from "@ant-design/icons";
-import React, { useState, Suspense, lazy } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import {
   Navigate,
   Route,
   Routes,
-  useLocation,
   useNavigate,
 } from "react-router";
 import AnimeForm from "./components/AnimeForm.jsx";
@@ -30,7 +30,6 @@ import {
   submitAnimeToTurso,
 } from "./services/animeApi.js";
 import { normalizeAnimeEpisodeDates } from "./utils/episodeDate.js";
-import { getActiveMode } from "./utils/routes.js";
 
 const { Content } = Layout;
 const { Paragraph, Title } = Typography;
@@ -55,8 +54,6 @@ const emptyAnime = {
   characters: [],
 };
 
-const BulkImport = lazy(() => import("./components/BulkImport.jsx"));
-
 export default function App() {
   const [scrapeForm] = Form.useForm();
   const [animeForm] = Form.useForm();
@@ -67,9 +64,18 @@ export default function App() {
   const [hasData, setHasData] = useState(false);
   const [previewAnime, setPreviewAnime] = useState(emptyAnime);
   const [messageApi, contextHolder] = message.useMessage();
-  const location = useLocation();
   const navigate = useNavigate();
-  const activeMode = getActiveMode(location.pathname);
+
+  const [isDarkMode, setIsDarkMode] = useState(
+    window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches
+  );
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const handleChange = (e) => setIsDarkMode(e.matches);
+    mediaQuery.addEventListener("change", handleChange);
+    return () => mediaQuery.removeEventListener("change", handleChange);
+  }, []);
   const updatePreview = () =>
     setPreviewAnime(normalizeAnimeEpisodeDates(animeForm.getFieldsValue(true)));
 
@@ -173,9 +179,14 @@ export default function App() {
   };
 
   return (
-    <Layout className="app-shell">
-      {contextHolder}
-      <Content className="container">
+    <ConfigProvider
+      theme={{
+        algorithm: isDarkMode ? theme.darkAlgorithm : theme.defaultAlgorithm,
+      }}
+    >
+      <Layout className="app-shell">
+        {contextHolder}
+        <Content className="container">
         <header className="header">
           <Title>Resnime Admin Importer</Title>
           <Paragraph>
@@ -183,18 +194,6 @@ export default function App() {
             secara manual sebelum masuk database.
           </Paragraph>
         </header>
-
-        <Segmented
-          className="mode-switch"
-          options={[
-            { label: "Manual Input", value: "manual" },
-            { label: "Bulk Insert", value: "bulk" },
-          ]}
-          value={activeMode}
-          onChange={(nextMode) =>
-            navigate(nextMode === "bulk" ? "/bulk" : "/manual")
-          }
-        />
 
         <Suspense
           fallback={
@@ -231,19 +230,12 @@ export default function App() {
                 />
               }
             />
-            <Route
-              path="/bulk"
-              element={<BulkImport messageApi={messageApi} />}
-            />
-            <Route
-              path="/bulk/:animeId/review"
-              element={<BulkImport messageApi={messageApi} />}
-            />
             <Route path="*" element={<Navigate to="/manual" replace />} />
           </Routes>
         </Suspense>
       </Content>
-    </Layout>
+      </Layout>
+    </ConfigProvider>
   );
 }
 

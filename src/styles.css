@@ -4,13 +4,13 @@
 
 body {
   margin: 0;
-  background: #f5f7fb;
-  color: #172033;
+  background: var(--ant-color-bg-layout, #f5f7fb);
+  color: var(--ant-color-text, #172033);
 }
 
 .app-shell {
   min-height: 100vh;
-  background: #f5f7fb;
+  background: var(--ant-color-bg-layout, #f5f7fb);
 }
 
 .container {
@@ -138,15 +138,7 @@ body {
   padding-left: 18px;
 }
 
-.bulk-toolbar,
-.bulk-review-actions {
-  width: 100%;
-  margin-bottom: 16px;
-}
 
-.bulk-summary {
-  margin: 0;
-}
 
 .table-poster {
   object-fit: cover;

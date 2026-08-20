@@ -52,21 +52,3 @@ export async function submitAnimeToTurso(anime) {
   return payload;
 }
 
-export async function bulkUpsertAnime(items) {
-  const response = await fetch(`${API_BASE_URL}/api/anime/bulk-upsert`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ items }),
-  });
-
-  const payload = await response.json().catch(() => null);
-  if (!response.ok || !payload?.success) {
-    const error = new Error(
-      payload?.error?.message || "Failed to submit bulk anime to Turso.",
-    );
-    error.details = payload?.error?.details || [];
-    throw error;
-  }
-
-  return payload;
-}
