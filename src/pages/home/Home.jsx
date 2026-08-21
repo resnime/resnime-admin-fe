@@ -1,17 +1,16 @@
 import {
   Alert,
   Button,
-  Card,
   Form,
-  InputNumber,
   Modal,
   Space,
 } from "antd";
-import { DatabaseOutlined, SearchOutlined } from "@ant-design/icons";
+import { DatabaseOutlined } from "@ant-design/icons";
 import { useState } from "react";
 
 import AnimeForm from "../../components/home/AnimeForm.jsx";
 import AnimePreview from "../../components/home/AnimePreview.jsx";
+import HomeFormSkeleton from "../../components/home/HomeFormSkeleton.jsx";
 import HomeHeaderSearch from "../../components/home/home-header-search/index.jsx";
 import {
   fetchAnimeFromTurso,
@@ -108,11 +107,14 @@ export default function Home({ messageApi }) {
     }
   };
 
-  const handleFetchFromTurso = async () => {
+  const handleFetchFromTurso = async (idToFetch) => {
     if (fetchingTursoAnime) return;
 
-    const malId =
-      animeForm.getFieldValue("id") || scrapeForm.getFieldValue("malId");
+    // Use idToFetch if provided (e.g. from modal) or fallback to form values
+    let malId = idToFetch;
+    if (typeof malId !== "string" && typeof malId !== "number") {
+      malId = animeForm.getFieldValue("id") || scrapeForm.getFieldValue("malId");
+    }
     if (!Number.isInteger(Number(malId)) || Number(malId) <= 0) {
       messageApi.error("Masukkan MyAnimeList ID yang valid.");
       return;
@@ -192,6 +194,7 @@ export default function Home({ messageApi }) {
         scrapeForm={scrapeForm} 
         onScrape={handleScrape} 
         isScraping={loading} 
+        onFetchFromTurso={handleFetchFromTurso}
       />
 
 
@@ -203,41 +206,47 @@ export default function Home({ messageApi }) {
         </Space>
       ) : null}
 
-      <Form 
-        form={animeForm} 
-        layout="vertical" 
-        initialValues={formValues}
-        onValuesChange={handleValuesChange}
-      >
-        <AnimePreview anime={formValues} />
-        {hasData ? <AnimeForm form={animeForm} formValues={formValues} /> : null}
-      </Form>
-      {hasData ? (
-        <Space className="fixed-form-actions">
-          <Button
-            size="large"
-            icon={<DatabaseOutlined />}
-            loading={fetchingTursoAnime}
-            disabled={fetchingTursoAnime}
-            onClick={handleFetchFromTurso}
+      {fetchingTursoAnime ? (
+        <HomeFormSkeleton />
+      ) : (
+        <>
+          <Form 
+            form={animeForm} 
+            layout="vertical" 
+            initialValues={formValues}
+            onValuesChange={handleValuesChange}
           >
-            Fetch from Turso
-          </Button>
-          <Button size="large" onClick={updatePreview}>
-            Update Preview
-          </Button>
-          <Button
-            type="primary"
-            size="large"
-            icon={<DatabaseOutlined />}
-            loading={submitting}
-            disabled={submitting}
-            onClick={handleSubmitToTurso}
-          >
-            Submit to Turso
-          </Button>
-        </Space>
-      ) : null}
+            <AnimePreview anime={formValues} />
+            {hasData ? <AnimeForm form={animeForm} formValues={formValues} /> : null}
+          </Form>
+          {hasData ? (
+            <Space className="fixed-form-actions">
+              <Button
+                size="large"
+                icon={<DatabaseOutlined />}
+                loading={fetchingTursoAnime}
+                disabled={fetchingTursoAnime}
+                onClick={handleFetchFromTurso}
+              >
+                Fetch from Turso
+              </Button>
+              <Button size="large" onClick={updatePreview}>
+                Update Preview
+              </Button>
+              <Button
+                type="primary"
+                size="large"
+                icon={<DatabaseOutlined />}
+                loading={submitting}
+                disabled={submitting}
+                onClick={handleSubmitToTurso}
+              >
+                Submit to Turso
+              </Button>
+            </Space>
+          ) : null}
+        </>
+      )}
     </>
   );
 }

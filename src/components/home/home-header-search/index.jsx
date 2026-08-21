@@ -4,7 +4,7 @@ import { useState } from "react";
 import HomeHeaderSearchModalTursoData from "./HomeHeaderSearchModalTursoData.jsx";
 import { fetchAllAnimeFromTurso } from "../../../services/animeApi.js";
 
-export default function HomeHeaderSearch({ scrapeForm, onScrape, isScraping }) {
+export default function HomeHeaderSearch({ scrapeForm, onScrape, isScraping, onFetchFromTurso }) {
   const [modalOpen, setModalOpen] = useState(false);
   const [tursoData, setTursoData] = useState([]);
   const [fetching, setFetching] = useState(false);
@@ -82,6 +82,10 @@ export default function HomeHeaderSearch({ scrapeForm, onScrape, isScraping }) {
         onCancel={() => setModalOpen(false)}
         data={tursoData}
         loading={fetching}
+        onRowClick={(record) => {
+          onFetchFromTurso(record.id);
+          setModalOpen(false);
+        }}
       />
     </>
   );

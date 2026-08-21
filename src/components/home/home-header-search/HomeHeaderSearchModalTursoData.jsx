@@ -5,12 +5,14 @@ export default function HomeHeaderSearchModalTursoData({
   onCancel,
   data,
   loading,
+  onRowClick,
 }) {
   const columns = [
     {
       title: "Photo",
       dataIndex: "photo",
       key: "photo",
+
       render: (text) =>
         text ? <Image src={text} alt="anime" width={50} /> : "No Image",
     },
@@ -41,6 +43,13 @@ export default function HomeHeaderSearchModalTursoData({
         loading={loading}
         pagination={{ pageSize: 20 }}
         scroll={{ y: 400 }}
+        onRow={(record) => {
+          return {
+            onClick() {
+              if (onRowClick) onRowClick(record);
+            },
+          };
+        }}
       />
     </Modal>
   );
