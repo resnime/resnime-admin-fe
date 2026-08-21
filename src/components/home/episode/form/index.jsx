@@ -1,4 +1,4 @@
-import { Card, Space } from "antd";
+import { Space } from "antd";
 import { useState } from "react";
 import EpisodeRangeGenerator from "./EpisodeRangeGenerator.jsx";
 import EpisodeList from "./EpisodeList.jsx";
@@ -8,7 +8,7 @@ export default function HomeEpisodeForm({ form, episodeTotal, episodes }) {
   const [isImportOpen, setIsImportOpen] = useState(false);
 
   return (
-    <Card title="Episodes">
+    <>
       <Space orientation="vertical" size="middle" className="full-width">
         <EpisodeRangeGenerator form={form} episodeTotal={episodeTotal} />
 
@@ -24,6 +24,6 @@ export default function HomeEpisodeForm({ form, episodeTotal, episodes }) {
         isOpen={isImportOpen}
         onClose={() => setIsImportOpen(false)}
       />
-    </Card>
+    </>
   );
 }

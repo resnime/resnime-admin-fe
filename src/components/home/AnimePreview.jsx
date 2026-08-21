@@ -1,12 +1,12 @@
 import { Row, Typography } from "antd";
 
-import HomeMetadataPreview from "./metadata/preview/index.jsx";
-import HomeEpisodePreview from "./episode/preview/index.jsx";
-import HomeCharacterPreview from "./character/preview/index.jsx";
+import HomeMetadata from "./metadata/index.jsx";
+import HomeEpisode from "./episode/index.jsx";
+import HomeCharacter from "./character/index.jsx";
 
 const { Title } = Typography;
 
-export default function AnimePreview({ anime }) {
+export default function AnimePreview({ anime, form }) {
   if (!anime?.id) {
     return null;
   }
@@ -17,11 +17,15 @@ export default function AnimePreview({ anime }) {
   return (
     <section className="section">
       <Title level={3}>Preview</Title>
-      <HomeMetadataPreview anime={anime} />
+      <HomeMetadata anime={anime} form={form} />
 
       <Row gutter={[16, 16]} className="preview-lists">
-        <HomeEpisodePreview episodes={episodes} />
-        <HomeCharacterPreview characters={characters} />
+        <HomeEpisode
+          form={form}
+          episodes={episodes}
+          episodeTotal={anime.episode_total}
+        />
+        <HomeCharacter form={form} characters={characters} />
       </Row>
     </section>
   );

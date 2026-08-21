@@ -1,7 +1,6 @@
 import { Alert, Form, Modal, Space } from "antd";
 import { useState } from "react";
 
-import AnimeForm from "../../components/home/AnimeForm.jsx";
 import HomeFormActionBtn from "../../components/home/HomeFormActionBtn.jsx";
 import AnimePreview from "../../components/home/AnimePreview.jsx";
 import HomeFormSkeleton from "../../components/home/HomeFormSkeleton.jsx";
@@ -212,10 +211,7 @@ export default function Home({ messageApi }) {
             initialValues={formValues}
             onValuesChange={handleValuesChange}
           >
-            <AnimePreview anime={formValues} />
-            {hasData ? (
-              <AnimeForm form={animeForm} formValues={formValues} />
-            ) : null}
+            <AnimePreview anime={formValues} form={animeForm} />
           </Form>
 
           {hasData ? (

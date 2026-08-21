@@ -53,34 +53,29 @@ export default function HomeCharacterForm({ form }) {
   };
 
   return (
-    <Card
-      title="Characters"
-      extra={
-        <Button
-          danger
-          icon={<DeleteOutlined />}
-          onClick={() => form.setFieldsValue({ characters: [] })}
-        >
-          Delete All
-        </Button>
-      }
-    >
-      <Form.List name="characters">
-        {(fields, { add, remove }) => (
-          <Space direction="vertical" size="middle" className="full-width">
-            <Space>
-              <Button
-                icon={<PlusOutlined />}
-                onClick={() =>
-                  add({ name: "", photo: "", role: "", voice_actors: [] })
-                }
-              >
-                Add Character
-              </Button>
-              <Button type="primary" onClick={onFormatHDPhotos}>
-                Formatting to HD Photos Link
-              </Button>
-            </Space>
+    <Form.List name="characters">
+      {(fields, { add, remove }) => (
+        <Space direction="vertical" size="middle" className="full-width">
+          <Space wrap>
+            <Button
+              icon={<PlusOutlined />}
+              onClick={() =>
+                add({ name: "", photo: "", role: "", voice_actors: [] })
+              }
+            >
+              Add Character
+            </Button>
+            <Button type="primary" onClick={onFormatHDPhotos}>
+              Formatting to HD Photos Link
+            </Button>
+            <Button
+              danger
+              icon={<DeleteOutlined />}
+              onClick={() => form.setFieldsValue({ characters: [] })}
+            >
+              Delete All
+            </Button>
+          </Space>
             <div className="editor-list-scroll character-editor-scroll">
               <Collapse
                 items={fields.map((field) => ({
@@ -225,6 +220,5 @@ export default function HomeCharacterForm({ form }) {
           </Space>
         )}
       </Form.List>
-    </Card>
   );
 }

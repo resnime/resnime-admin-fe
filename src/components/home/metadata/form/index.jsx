@@ -1,5 +1,4 @@
 import {
-  Card,
   Col,
   Form,
   Input,
@@ -11,10 +10,9 @@ import {
 
 const { TextArea } = Input;
 
-export default function HomeMetadataForm({ form, metadataExtra = null }) {
+export default function HomeMetadataForm({ form }) {
   return (
-    <Card title="Metadata" extra={metadataExtra}>
-      <Row gutter={[16, 0]}>
+    <Row gutter={[16, 0]}>
         <Col xs={24} md={8}>
           <Form.Item
             label="MAL ID"
@@ -155,6 +153,5 @@ export default function HomeMetadataForm({ form, metadataExtra = null }) {
           </Form.Item>
         </Col>
       </Row>
-    </Card>
   );
 }

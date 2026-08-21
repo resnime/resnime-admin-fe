@@ -1,5 +1,4 @@
 import {
-  Card,
   Col,
   Descriptions,
   Empty,
@@ -16,7 +15,7 @@ export default function HomeMetadataPreview({ anime }) {
   if (!anime) return null;
 
   return (
-    <Card>
+    <>
       {anime.banner_bg_img ? (
         <img
           className="banner"
@@ -99,6 +98,6 @@ export default function HomeMetadataPreview({ anime }) {
           </Space>
         </Col>
       </Row>
-    </Card>
+    </>
   );
 }
