@@ -7,10 +7,13 @@ import {
   Select,
   Typography,
 } from "antd";
+import { useHomeCtx } from "../../../../context/HomeCtxProvider.jsx";
 
 const { TextArea } = Input;
 
-export default function HomeMetadataForm({ form }) {
+export default function HomeMetadataForm() {
+  const { animeForm: form } = useHomeCtx();
+
   return (
     <Row gutter={[16, 0]}>
         <Col xs={24} md={8}>

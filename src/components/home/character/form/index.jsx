@@ -10,8 +10,11 @@ import {
   Space,
 } from "antd";
 import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
+import { useHomeCtx } from "../../../../context/HomeCtxProvider.jsx";
 
-export default function HomeCharacterForm({ form }) {
+export default function HomeCharacterForm() {
+  const { animeForm: form } = useHomeCtx();
+
   const formatUrl = (url) =>
     url ? url.replace(/\/r\/\d+x\d+\//, "/").split("?")[0] : url;
 

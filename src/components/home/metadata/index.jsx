@@ -4,7 +4,7 @@ import { useState } from "react";
 import HomeMetadataPreview from "./preview/index.jsx";
 import HomeMetadataForm from "./form/index.jsx";
 
-export default function HomeMetadata({ anime, form }) {
+export default function HomeMetadata() {
   const [isEditing, setIsEditing] = useState(false);
 
   return (
@@ -19,11 +19,7 @@ export default function HomeMetadata({ anime, form }) {
         </Button>
       }
     >
-      {isEditing ? (
-        <HomeMetadataForm form={form} />
-      ) : (
-        <HomeMetadataPreview anime={anime} />
-      )}
+      {isEditing ? <HomeMetadataForm /> : <HomeMetadataPreview />}
     </Card>
   );
 }

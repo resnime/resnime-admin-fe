@@ -8,11 +8,14 @@ import {
   Tag,
   Typography,
 } from "antd";
+import { useHomeCtx } from "../../../../context/HomeCtxProvider.jsx";
 
 const { Paragraph, Text, Title } = Typography;
 
-export default function HomeMetadataPreview({ anime }) {
+export default function HomeMetadataPreview() {
+  const { formValues: anime } = useHomeCtx();
   if (!anime) return null;
+
 
   return (
     <>

@@ -1,8 +1,12 @@
 import { List, Typography } from "antd";
+import { useHomeCtx } from "../../../../context/HomeCtxProvider.jsx";
 
 const { Text } = Typography;
 
-export default function HomeEpisodePreview({ episodes = [] }) {
+export default function HomeEpisodePreview() {
+  const { formValues } = useHomeCtx();
+  const episodes = formValues?.episodes || [];
+
   return (
     <div className="episode-preview-scroll">
       <List

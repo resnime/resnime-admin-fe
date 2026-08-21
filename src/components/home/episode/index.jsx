@@ -4,7 +4,7 @@ import { useState } from "react";
 import HomeEpisodePreview from "./preview/index.jsx";
 import HomeEpisodeForm from "./form/index.jsx";
 
-export default function HomeEpisode({ form, episodes = [], episodeTotal }) {
+export default function HomeEpisode() {
   const [isEditing, setIsEditing] = useState(false);
 
   return (
@@ -20,15 +20,7 @@ export default function HomeEpisode({ form, episodes = [], episodeTotal }) {
           </Button>
         }
       >
-        {isEditing ? (
-          <HomeEpisodeForm
-            form={form}
-            episodeTotal={episodeTotal}
-            episodes={episodes}
-          />
-        ) : (
-          <HomeEpisodePreview episodes={episodes} />
-        )}
+        {isEditing ? <HomeEpisodeForm /> : <HomeEpisodePreview />}
       </Card>
     </Col>
   );

@@ -4,7 +4,7 @@ import { useState } from "react";
 import HomeCharacterPreview from "./preview/index.jsx";
 import HomeCharacterForm from "./form/index.jsx";
 
-export default function HomeCharacter({ characters = [], form }) {
+export default function HomeCharacter() {
   const [isEditing, setIsEditing] = useState(false);
 
   return (
@@ -20,11 +20,7 @@ export default function HomeCharacter({ characters = [], form }) {
           </Button>
         }
       >
-        {isEditing ? (
-          <HomeCharacterForm form={form} />
-        ) : (
-          <HomeCharacterPreview characters={characters} />
-        )}
+        {isEditing ? <HomeCharacterForm /> : <HomeCharacterPreview />}
       </Card>
     </Col>
   );

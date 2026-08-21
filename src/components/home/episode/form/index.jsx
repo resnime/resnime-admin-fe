@@ -3,9 +3,14 @@ import { useState } from "react";
 import EpisodeRangeGenerator from "./EpisodeRangeGenerator.jsx";
 import EpisodeList from "./EpisodeList.jsx";
 import EpisodeImportModal from "./EpisodeImportModal.jsx";
+import { useHomeCtx } from "../../../../context/HomeCtxProvider.jsx";
 
-export default function HomeEpisodeForm({ form, episodeTotal, episodes }) {
+export default function HomeEpisodeForm() {
+  const { animeForm: form, formValues } = useHomeCtx();
   const [isImportOpen, setIsImportOpen] = useState(false);
+  const episodes = formValues?.episodes || [];
+  const episodeTotal = formValues?.episode_total;
+
 
   return (
     <>

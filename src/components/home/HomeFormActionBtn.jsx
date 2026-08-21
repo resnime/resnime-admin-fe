@@ -1,13 +1,17 @@
 import { Button, Space } from "antd";
 import { DatabaseOutlined } from "@ant-design/icons";
+import { useHomeCtx } from "../../context/HomeCtxProvider.jsx";
 
-export default function HomeFormActionBtn({
-  fetchingTursoAnime,
-  submitting,
-  onFetchFromTurso,
-  onUpdatePreview,
-  onSubmitToTurso,
-}) {
+export default function HomeFormActionBtn() {
+  const {
+    fetchingTursoAnime,
+    submitting,
+    handleFetchFromTurso: onFetchFromTurso,
+    updatePreview: onUpdatePreview,
+    handleSubmitToTurso: onSubmitToTurso,
+  } = useHomeCtx();
+
+
   return (
     <Space className="fixed-form-actions">
       <Button

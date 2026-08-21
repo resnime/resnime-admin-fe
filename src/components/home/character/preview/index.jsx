@@ -1,7 +1,11 @@
 import { List } from "antd";
 import VoiceActorPreview from "../../VoiceActorPreview.jsx";
+import { useHomeCtx } from "../../../../context/HomeCtxProvider.jsx";
 
-export default function HomeCharacterPreview({ characters = [] }) {
+export default function HomeCharacterPreview() {
+  const { formValues } = useHomeCtx();
+  const characters = formValues?.characters || [];
+
   return (
     <div className="character-preview-scroll">
       <List

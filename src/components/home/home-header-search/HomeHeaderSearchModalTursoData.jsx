@@ -45,6 +45,9 @@ export default function HomeHeaderSearchModalTursoData({
         scroll={{ y: 400 }}
         onRow={(record) => {
           return {
+            style: {
+              cursor: "pointer",
+            },
             onClick() {
               if (onRowClick) onRowClick(record);
             },

@@ -3,8 +3,17 @@ import { SearchOutlined, DatabaseOutlined } from "@ant-design/icons";
 import { useState } from "react";
 import HomeHeaderSearchModalTursoData from "./HomeHeaderSearchModalTursoData.jsx";
 import { fetchAllAnimeFromTurso } from "../../../services/animeApi.js";
+import { useHomeCtx } from "../../../context/HomeCtxProvider.jsx";
 
-export default function HomeHeaderSearch({ scrapeForm, onScrape, isScraping, onFetchFromTurso }) {
+export default function HomeHeaderSearch() {
+  const {
+    scrapeForm,
+    handleScrape: onScrape,
+    loading: isScraping,
+    handleFetchFromTurso: onFetchFromTurso,
+  } = useHomeCtx();
+
+
   const [modalOpen, setModalOpen] = useState(false);
   const [tursoData, setTursoData] = useState([]);
   const [fetching, setFetching] = useState(false);
