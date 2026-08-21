@@ -1,8 +1,8 @@
 import { Alert, Form, Modal, Space } from "antd";
 import { useState } from "react";
 
-import AnimeForm from "../../components/home/form/index.jsx";
-import HomeFormActionBtn from "../../components/home/form/HomeFormActionBtn.jsx";
+import AnimeForm from "../../components/home/AnimeForm.jsx";
+import HomeFormActionBtn from "../../components/home/HomeFormActionBtn.jsx";
 import AnimePreview from "../../components/home/AnimePreview.jsx";
 import HomeFormSkeleton from "../../components/home/HomeFormSkeleton.jsx";
 import HomeHeaderSearch from "../../components/home/home-header-search/index.jsx";

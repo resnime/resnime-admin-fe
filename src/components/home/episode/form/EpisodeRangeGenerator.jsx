@@ -42,13 +42,13 @@ export default function EpisodeRangeGenerator({ form, episodeTotal }) {
         </Col>
         <Col xs={24} sm={8}>
           <Button
-            onClick={() =>
-              generateRange(
-                form.getFieldValue("episode_range_start"),
-                form.getFieldValue("episode_range_end"),
-              )
-            }
+            type="dashed"
             className="full-width"
+            onClick={() => {
+              const start = form.getFieldValue("episode_range_start");
+              const end = form.getFieldValue("episode_range_end");
+              generateRange(start, end);
+            }}
           >
             Generate Range
           </Button>

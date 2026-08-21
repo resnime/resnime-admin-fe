@@ -11,8 +11,7 @@ import {
 } from "antd";
 import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
 
-
-export default function CharacterEditor({ form }) {
+export default function HomeCharacterForm({ form }) {
   const formatUrl = (url) =>
     url ? url.replace(/\/r\/\d+x\d+\//, "/").split("?")[0] : url;
 
@@ -52,6 +51,7 @@ export default function CharacterEditor({ form }) {
       form.setFieldsValue({ characters: newCharacters });
     }
   };
+
   return (
     <Card
       title="Characters"
