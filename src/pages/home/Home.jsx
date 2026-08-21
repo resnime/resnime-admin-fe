@@ -1,14 +1,8 @@
-import {
-  Alert,
-  Button,
-  Form,
-  Modal,
-  Space,
-} from "antd";
-import { DatabaseOutlined } from "@ant-design/icons";
+import { Alert, Form, Modal, Space } from "antd";
 import { useState } from "react";
 
-import AnimeForm from "../../components/home/AnimeForm.jsx";
+import AnimeForm from "../../components/home/form/index.jsx";
+import HomeFormActionBtn from "../../components/home/form/HomeFormActionBtn.jsx";
 import AnimePreview from "../../components/home/AnimePreview.jsx";
 import HomeFormSkeleton from "../../components/home/HomeFormSkeleton.jsx";
 import HomeHeaderSearch from "../../components/home/home-header-search/index.jsx";
@@ -44,7 +38,7 @@ const LOCAL_STORAGE_KEY = "resnime_admin_draft";
 export default function Home({ messageApi }) {
   const [scrapeForm] = Form.useForm();
   const [animeForm] = Form.useForm();
-  
+
   const [loading, setLoading] = useState(false);
   const [fetchingTursoAnime, setFetchingTursoAnime] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -72,7 +66,9 @@ export default function Home({ messageApi }) {
   // Wait, Form initialValues only works on first render. So it should work perfectly with lazy init.
 
   const updatePreview = () => {
-    const currentValues = normalizeAnimeEpisodeDates(animeForm.getFieldsValue(true));
+    const currentValues = normalizeAnimeEpisodeDates(
+      animeForm.getFieldsValue(true),
+    );
     setFormValues(currentValues);
   };
 
@@ -113,7 +109,8 @@ export default function Home({ messageApi }) {
     // Use idToFetch if provided (e.g. from modal) or fallback to form values
     let malId = idToFetch;
     if (typeof malId !== "string" && typeof malId !== "number") {
-      malId = animeForm.getFieldValue("id") || scrapeForm.getFieldValue("malId");
+      malId =
+        animeForm.getFieldValue("id") || scrapeForm.getFieldValue("malId");
     }
     if (!Number.isInteger(Number(malId)) || Number(malId) <= 0) {
       messageApi.error("Masukkan MyAnimeList ID yang valid.");
@@ -190,13 +187,12 @@ export default function Home({ messageApi }) {
 
   return (
     <>
-      <HomeHeaderSearch 
-        scrapeForm={scrapeForm} 
-        onScrape={handleScrape} 
-        isScraping={loading} 
+      <HomeHeaderSearch
+        scrapeForm={scrapeForm}
+        onScrape={handleScrape}
+        isScraping={loading}
         onFetchFromTurso={handleFetchFromTurso}
       />
-
 
       {warnings.length ? (
         <Space direction="vertical" className="full-width warning-list">
@@ -210,40 +206,26 @@ export default function Home({ messageApi }) {
         <HomeFormSkeleton />
       ) : (
         <>
-          <Form 
-            form={animeForm} 
-            layout="vertical" 
+          <Form
+            form={animeForm}
+            layout="vertical"
             initialValues={formValues}
             onValuesChange={handleValuesChange}
           >
             <AnimePreview anime={formValues} />
-            {hasData ? <AnimeForm form={animeForm} formValues={formValues} /> : null}
+            {hasData ? (
+              <AnimeForm form={animeForm} formValues={formValues} />
+            ) : null}
           </Form>
+
           {hasData ? (
-            <Space className="fixed-form-actions">
-              <Button
-                size="large"
-                icon={<DatabaseOutlined />}
-                loading={fetchingTursoAnime}
-                disabled={fetchingTursoAnime}
-                onClick={handleFetchFromTurso}
-              >
-                Fetch from Turso
-              </Button>
-              <Button size="large" onClick={updatePreview}>
-                Update Preview
-              </Button>
-              <Button
-                type="primary"
-                size="large"
-                icon={<DatabaseOutlined />}
-                loading={submitting}
-                disabled={submitting}
-                onClick={handleSubmitToTurso}
-              >
-                Submit to Turso
-              </Button>
-            </Space>
+            <HomeFormActionBtn
+              fetchingTursoAnime={fetchingTursoAnime}
+              submitting={submitting}
+              onFetchFromTurso={handleFetchFromTurso}
+              onUpdatePreview={updatePreview}
+              onSubmitToTurso={handleSubmitToTurso}
+            />
           ) : null}
         </>
       )}

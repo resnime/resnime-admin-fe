@@ -7,7 +7,7 @@ import {
   calculateEpisodeImportSummary,
   mergeEpisodeLinks,
   parseEpisodeLinksJson,
-} from "../../../utils/episodeLinksJson.js";
+} from "../../../../utils/episodeLinksJson.js";
 
 const { Text } = Typography;
 

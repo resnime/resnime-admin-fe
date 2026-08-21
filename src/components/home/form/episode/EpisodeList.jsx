@@ -1,7 +1,7 @@
 import { Button, Col, Collapse, Divider, Form, Input, InputNumber, Row, Space } from "antd";
 import { DeleteOutlined, PlusOutlined, UploadOutlined } from "@ant-design/icons";
-import { isValidEpisodeAiredAt } from "../../../utils/episodeDate.js";
-import { createEmptyEpisode } from "../../../utils/episodes.js";
+import { isValidEpisodeAiredAt } from "../../../../utils/episodeDate.js";
+import { createEmptyEpisode } from "../../../../utils/episodes.js";
 
 export default function EpisodeList({ episodes, onImportClick }) {
   function nextEpisodeNumber(episodes) {

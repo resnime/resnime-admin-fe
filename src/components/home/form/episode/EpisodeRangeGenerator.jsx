@@ -1,5 +1,5 @@
 import { Button, Col, Form, InputNumber, Row, Space, Typography, message } from "antd";
-import { mergeEpisodeRange } from "../../../utils/episodes.js";
+import { mergeEpisodeRange } from "../../../../utils/episodes.js";
 
 const { Text } = Typography;
 
