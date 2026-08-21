@@ -16,6 +16,15 @@ export async function scrapeAnime(malId) {
   return payload;
 }
 
+export async function fetchAllAnimeFromTurso() {
+  const response = await fetch(`${API_BASE_URL}/api/anime`);
+  const payload = await response.json().catch(() => null);
+  if (!response.ok || !payload?.success) {
+    throw new Error(payload?.error?.message || "Failed to fetch all anime from Turso.");
+  }
+  return payload;
+}
+
 export async function fetchAnimeFromTurso(malId) {
   const response = await fetch(
     `${API_BASE_URL}/api/anime/${encodeURIComponent(String(malId))}`,

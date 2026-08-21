@@ -12,6 +12,7 @@ import { useState } from "react";
 
 import AnimeForm from "../../components/home/AnimeForm.jsx";
 import AnimePreview from "../../components/home/AnimePreview.jsx";
+import HomeHeaderSearch from "../../components/home/home-header-search/index.jsx";
 import {
   fetchAnimeFromTurso,
   scrapeAnime,
@@ -187,48 +188,12 @@ export default function Home({ messageApi }) {
 
   return (
     <>
-      <Card className="scrape-card">
-        <Form
-          form={scrapeForm}
-          layout="inline"
-          onFinish={handleScrape}
-          className="scrape-form"
-        >
-          <Form.Item
-            label="MyAnimeList ID"
-            name="malId"
-            rules={[
-              { required: true, message: "Masukkan MyAnimeList ID." },
-              {
-                validator: (_, value) => {
-                  if (value === undefined || value === null || value === "")
-                    return Promise.resolve();
-                  return Number.isInteger(Number(value)) && Number(value) > 0
-                    ? Promise.resolve()
-                    : Promise.reject(new Error("ID harus angka positif."));
-                },
-              },
-            ]}
-          >
-            <InputNumber
-              min={1}
-              precision={0}
-              controls={false}
-              className="mal-input"
-            />
-          </Form.Item>
-          <Form.Item>
-            <Button
-              type="primary"
-              htmlType="submit"
-              loading={loading}
-              icon={<SearchOutlined />}
-            >
-              Scrape Anime
-            </Button>
-          </Form.Item>
-        </Form>
-      </Card>
+      <HomeHeaderSearch 
+        scrapeForm={scrapeForm} 
+        onScrape={handleScrape} 
+        isScraping={loading} 
+      />
+
 
       {warnings.length ? (
         <Space direction="vertical" className="full-width warning-list">
