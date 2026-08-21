@@ -11,20 +11,12 @@ import {
 
 const { Text } = Typography;
 
-const formatExample = `[
-  {
-    "episode_number": 1,
-    "aired_at": "1999-10-20T00:00:00+00:00",
-    "thumbnail_url": null,
-    "links": [
-      {
-        "embed_url": "https://example.com/embed/episode-1"
-      }
-    ]
-  }
-]`;
-
-export default function EpisodeImportModal({ form, episodes, isOpen, onClose }) {
+export default function EpisodeImportModal({
+  form,
+  episodes,
+  isOpen,
+  onClose,
+}) {
   const [messageApi, contextHolder] = message.useMessage();
   const [fileList, setFileList] = useState([]);
   const [importResult, setImportResult] = useState(null);
@@ -62,12 +54,20 @@ export default function EpisodeImportModal({ form, episodes, isOpen, onClose }) 
       file.name.toLowerCase().endsWith(".json");
     if (!isJson) {
       setFileList([]);
-      setImportResult({ ok: false, errors: ["Only JSON files are supported."], warnings: [] });
+      setImportResult({
+        ok: false,
+        errors: ["Only JSON files are supported."],
+        warnings: [],
+      });
       return;
     }
     if (file.size > EPISODE_LINK_IMPORT_MAX_SIZE) {
       setFileList([]);
-      setImportResult({ ok: false, errors: ["JSON file must be 1 MB or smaller."], warnings: [] });
+      setImportResult({
+        ok: false,
+        errors: ["JSON file must be 1 MB or smaller."],
+        warnings: [],
+      });
       return;
     }
 
@@ -76,7 +76,11 @@ export default function EpisodeImportModal({ form, episodes, isOpen, onClose }) 
     try {
       setImportResult(parseEpisodeLinksJson(await file.text()));
     } catch {
-      setImportResult({ ok: false, errors: ["Could not read the selected file."], warnings: [] });
+      setImportResult({
+        ok: false,
+        errors: ["Could not read the selected file."],
+        warnings: [],
+      });
     } finally {
       setIsParsing(false);
     }
@@ -106,7 +110,9 @@ export default function EpisodeImportModal({ form, episodes, isOpen, onClose }) 
       );
       handleClose();
     } catch {
-      messageApi.error("Episode links could not be applied. The current form was kept unchanged.");
+      messageApi.error(
+        "Episode links could not be applied. The current form was kept unchanged.",
+      );
     } finally {
       setIsApplying(false);
     }
@@ -132,8 +138,6 @@ export default function EpisodeImportModal({ form, episodes, isOpen, onClose }) 
             Upload a JSON file containing episode numbers and streaming links.
             The data will only be applied to the current form.
           </Text>
-
-          <pre className="json-example">{formatExample}</pre>
 
           <Upload.Dragger
             accept=".json,application/json"

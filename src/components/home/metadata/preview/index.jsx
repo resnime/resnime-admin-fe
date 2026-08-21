@@ -9,6 +9,7 @@ import {
   Typography,
 } from "antd";
 import { useHomeCtx } from "../../../../context/HomeCtxProvider.jsx";
+import { getAssetUrl } from "../../../../utils/imageUrl.js";
 
 const { Paragraph, Text, Title } = Typography;
 
@@ -22,7 +23,7 @@ export default function HomeMetadataPreview() {
       {anime.banner_bg_img ? (
         <img
           className="banner"
-          src={anime.banner_bg_img}
+          src={getAssetUrl(anime.banner_bg_img)}
           alt=""
           referrerPolicy="no-referrer"
         />
@@ -33,7 +34,7 @@ export default function HomeMetadataPreview() {
           {anime.photo ? (
             <Image
               className="poster"
-              src={anime.photo}
+              src={getAssetUrl(anime.photo)}
               alt={anime.title_en || anime.title_native || anime.title_romaji}
               referrerPolicy="no-referrer"
             />

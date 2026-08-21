@@ -50,11 +50,7 @@ export function parseEpisodeLinksJson(fileText) {
       );
     }
 
-    const thumbnailUrl = normalizeThumbnailUrl(
-      item?.thumbnail_url,
-      episodeNumber,
-      warnings,
-    );
+    const thumbnailUrl = normalizeThumbnailUrl(item?.thumbnail_url);
     if (!isValidEpisodeAiredAt(item?.aired_at)) {
       errors.push(
         `Episode ${episodeNumber}: aired_at must be a valid ISO 8601 date string or null.`,
@@ -245,41 +241,24 @@ function normalizeLinks(links) {
   links.forEach((link) => {
     const embedUrl =
       typeof link?.embed_url === "string" ? link.embed_url.trim() : "";
-    // if (!isHttpUrl(embedUrl)) {
-    //   errors.push(
-    //     `Episode ${episodeNumber}, link ${index + 1}: embed_url must be a valid HTTP or HTTPS URL.`,
-    //   );
-    //   return;
-    // }
-    if (!seen.has(embedUrl)) {
-      seen.add(embedUrl);
-      normalized.push({ embed_url: embedUrl });
-    } else {
-      duplicateLinksRemoved += 1;
+    if (embedUrl) {
+      if (!seen.has(embedUrl)) {
+        seen.add(embedUrl);
+        normalized.push({ embed_url: embedUrl });
+      } else {
+        duplicateLinksRemoved += 1;
+      }
     }
   });
 
   return { links: normalized, duplicateLinksRemoved };
 }
 
-function normalizeThumbnailUrl(value, episodeNumber, warnings) {
+function normalizeThumbnailUrl(value) {
   if (value === null || value === undefined) return null;
   const thumbnailUrl = String(value).trim();
   if (!thumbnailUrl) return null;
-  if (isHttpUrl(thumbnailUrl)) return thumbnailUrl;
-  warnings.push(
-    `Episode ${episodeNumber}: thumbnail_url was ignored because it is not a valid HTTP or HTTPS URL.`,
-  );
-  return null;
-}
-
-function isHttpUrl(value) {
-  try {
-    const url = new URL(value);
-    return url.protocol === "http:" || url.protocol === "https:";
-  } catch {
-    return false;
-  }
+  return thumbnailUrl;
 }
 
 function cloneEpisode(episode) {

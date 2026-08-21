@@ -1,5 +1,5 @@
 import { Space, Typography } from "antd";
-
+import { getAssetUrl } from "../../utils/imageUrl";
 
 const { Text } = Typography;
 
@@ -15,7 +15,7 @@ export default function VoiceActorPreview({ voiceActors }) {
           {actor.photo ? (
             <img
               className="voice-actor-img"
-              src={actor.photo}
+              src={getAssetUrl(actor.photo)}
               alt=""
               referrerPolicy="no-referrer"
             />

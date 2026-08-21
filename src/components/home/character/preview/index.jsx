@@ -1,6 +1,7 @@
 import { List } from "antd";
 import VoiceActorPreview from "../../VoiceActorPreview.jsx";
 import { useHomeCtx } from "../../../../context/HomeCtxProvider.jsx";
+import { getAssetUrl } from "../../../../utils/imageUrl.js";
 
 export default function HomeCharacterPreview() {
   const { formValues } = useHomeCtx();
@@ -18,7 +19,7 @@ export default function HomeCharacterPreview() {
                 character.photo ? (
                   <img
                     className="avatar-img"
-                    src={character.photo}
+                    src={getAssetUrl(character.photo)}
                     alt=""
                     referrerPolicy="no-referrer"
                   />

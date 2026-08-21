@@ -1,4 +1,5 @@
 import { Modal, Table, Image } from "antd";
+import { getAssetUrl } from "../../../utils/imageUrl.js";
 
 export default function HomeHeaderSearchModalTursoData({
   open,
@@ -14,7 +15,7 @@ export default function HomeHeaderSearchModalTursoData({
       key: "photo",
 
       render: (text) =>
-        text ? <Image src={text} alt="anime" width={50} /> : "No Image",
+        text ? <Image src={getAssetUrl(text)} alt="anime" width={50} /> : "No Image",
     },
     {
       title: "MAL ID",

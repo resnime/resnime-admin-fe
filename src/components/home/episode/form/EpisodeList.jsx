@@ -1,16 +1,35 @@
-import { Button, Col, Collapse, Divider, Form, Input, InputNumber, Row, Space } from "antd";
-import { DeleteOutlined, PlusOutlined, UploadOutlined } from "@ant-design/icons";
+import {
+  Button,
+  Col,
+  Collapse,
+  Divider,
+  Form,
+  Input,
+  InputNumber,
+  Row,
+  Space,
+} from "antd";
+import {
+  DeleteOutlined,
+  DownloadOutlined,
+  PlusOutlined,
+  UploadOutlined,
+} from "@ant-design/icons";
 import { isValidEpisodeAiredAt } from "../../../../utils/episodeDate.js";
 import { createEmptyEpisode } from "../../../../utils/episodes.js";
 
-export default function EpisodeList({ episodes, onImportClick }) {
-  function nextEpisodeNumber(episodes) {
+export default function EpisodeList({
+  episodes,
+  onImportClick,
+  onExportClick,
+}) {
+  const nextEpisodeNumber = () => {
     const max = Math.max(
       0,
       ...episodes.map((episode) => Number(episode?.episode_number) || 0),
     );
     return max + 1;
-  }
+  };
 
   return (
     <Form.List
@@ -37,17 +56,19 @@ export default function EpisodeList({ episodes, onImportClick }) {
         <Space direction="vertical" size="middle" className="full-width">
           <Form.ErrorList errors={errors} />
           <Space wrap>
-            <Button
-              icon={<UploadOutlined />}
-              onClick={onImportClick}
-            >
+            <Button icon={<UploadOutlined />} onClick={onImportClick}>
               Import Episode Links JSON
             </Button>
+            <Button icon={<DownloadOutlined />} onClick={onExportClick}>
+              Export Episode Links JSON
+            </Button>
+
             <Button
+              type="primary"
               icon={<PlusOutlined />}
               onClick={() =>
                 add({
-                  ...createEmptyEpisode(nextEpisodeNumber(episodes)),
+                  ...createEmptyEpisode(nextEpisodeNumber()),
                 })
               }
             >

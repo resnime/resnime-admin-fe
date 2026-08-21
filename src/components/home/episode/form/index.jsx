@@ -1,25 +1,23 @@
 import { Space } from "antd";
 import { useState } from "react";
-import EpisodeRangeGenerator from "./EpisodeRangeGenerator.jsx";
 import EpisodeList from "./EpisodeList.jsx";
 import EpisodeImportModal from "./EpisodeImportModal.jsx";
+import EpisodeExportModal from "./EpisodeExportModal.jsx";
 import { useHomeCtx } from "../../../../context/HomeCtxProvider.jsx";
 
 export default function HomeEpisodeForm() {
   const { animeForm: form, formValues } = useHomeCtx();
   const [isImportOpen, setIsImportOpen] = useState(false);
+  const [isExportOpen, setIsExportOpen] = useState(false);
   const episodes = formValues?.episodes || [];
-  const episodeTotal = formValues?.episode_total;
-
 
   return (
     <>
       <Space orientation="vertical" size="middle" className="full-width">
-        <EpisodeRangeGenerator form={form} episodeTotal={episodeTotal} />
-
         <EpisodeList
           episodes={episodes}
           onImportClick={() => setIsImportOpen(true)}
+          onExportClick={() => setIsExportOpen(true)}
         />
       </Space>
 
@@ -28,6 +26,12 @@ export default function HomeEpisodeForm() {
         episodes={episodes}
         isOpen={isImportOpen}
         onClose={() => setIsImportOpen(false)}
+      />
+
+      <EpisodeExportModal
+        episodes={episodes}
+        isOpen={isExportOpen}
+        onClose={() => setIsExportOpen(false)}
       />
     </>
   );

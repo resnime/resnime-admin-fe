@@ -75,8 +75,8 @@ export function HomeCtxProvider({ children, messageApi }) {
     setFormValues(currentValues);
   };
 
-  const handleValuesChange = (_, allValues) => {
-    const currentValues = normalizeAnimeEpisodeDates(allValues);
+  const handleValuesChange = () => {
+    const currentValues = normalizeAnimeEpisodeDates(animeForm.getFieldsValue(true));
     setFormValues(currentValues);
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(currentValues));
   };
